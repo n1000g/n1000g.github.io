@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://n1000g.github.io</id>
     <title>n1000g</title>
-    <updated>2021-12-15T17:28:45.561Z</updated>
+    <updated>2021-12-15T17:34:56.237Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://n1000g.github.io"/>
     <link rel="self" href="https://n1000g.github.io/atom.xml"/>
@@ -202,7 +202,6 @@ class ZooApplication {
 ]]></summary>
         <content type="html"><![CDATA[<p>摘译自 <a href="https://www.baeldung.com/hibernate-criteria-queries#Criteria">baeldung</a></p>
 <!-- more -->
-<hr>
 <h2 id="1-概述">1. 概述</h2>
 <p>在本教程中，我们将讨论一个非常有用的 JPA 特性——标准查询。</p>
 <p>它不仅使我们能够在不使用纯 SQL 的情况下编写查询，而且还为查询提供了一些面向对象的控制，这也即 Hibernate 的主要特性之一。Criteria API 允许我们以编程的方式构建一个应用不同的过滤规则和逻辑条件的 Criteria 查询对象。</p>
