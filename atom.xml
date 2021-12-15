@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://n1000g.github.io</id>
     <title>n1000g</title>
-    <updated>2021-12-15T21:48:17.943Z</updated>
+    <updated>2021-12-15T22:07:10.584Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://n1000g.github.io"/>
     <link rel="self" href="https://n1000g.github.io/atom.xml"/>
@@ -364,7 +364,8 @@ void reader() {
     } while (true);
 }
 </code></pre>
-<h2 id="5-独木桥-单行道问题">5. 独木桥、单行道问题</h2>
+<h2 id="5-其他经典-p-v-操作问题">5. 其他经典 P-V 操作问题</h2>
+<h3 id="51-独木桥-单行道问题">5.1 独木桥、单行道问题</h3>
 <p>如题，南北通车，单行道上只能走同一方向的车辆。使用记录型信号量模拟道路情况。<br>
 分析：两个方向的车辆基本性质完全相同，均类似读者-写者问题中写者进程。使每类第一个到达的进程与另一类进程竞争单行道这一临界资源。</p>
 <pre><code class="language-c">/**
@@ -407,6 +408,12 @@ void N2S() {
     } while (true);
 }
 </code></pre>
+<h3 id="52-司机售票员同步问题">5.2 司机售票员同步问题</h3>
+<p>问题描述：汽车司机与售票员之间必须协同工作，一方面，只有售票员把车门关好了司机才能开车，因此，售票员关好车门应通知司机开车。另一方面，只有当司机已经停下，售票员才能开门上下客，故司机停车后应通知售票员。假定某辆公共汽车上有两名售票员与一名司机，汽车当前正在始发站停车上客，试设必要的信号灯及赋初值，写出他们的同步过程。</p>
+<p><strong>问题解答</strong></p>
+<blockquote>
+<p><a href="https://www.codeleading.com/article/32956105455/">https://www.codeleading.com/article/32956105455/</a></p>
+</blockquote>
 ]]></content>
     </entry>
     <entry>
