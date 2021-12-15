@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>操作系统 | n1000g</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://n1000g.github.io/favicon.ico?v=1639588181077">
+<link rel="stylesheet" href="https://n1000g.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="早日成长为一只老攻城狮">
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://n1000g.github.io">
+        <img src="https://n1000g.github.io/images/avatar.png?v=1639588181077" class="site-logo">
+        <h1 class="site-title">n1000g</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://n1000g.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/extract" class="site-nav">
+            摘译
+          </a>
+        
+      
+        
+          <a href="about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      早日成长为一只老攻城狮
+    </div>
+    <div class="site-footer">
+      <li>© 2021 GitHub, Inc.</li> | <a class="rss" href="https://n1000g.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <h2 class="current-tag">标签: 操作系统</h2>
+          
+            <article class="post-item">
+              <div class="left">
+                <a href="https://n1000g.github.io/post/f-vIjJNtK/">
+                  <h2 class="post-title">【OS 基础课笔记】一、操作系统引论</h2>
+                </a>
+                <div class="post-date">
+                  2021-12-13
+                </div>
+                <div class="post-abstract">
+                  <h1 id="操作系统概述">操作系统概述</h1>
+<h2 id="操作系统的概念和特征">操作系统的概念和特征</h2>
+<p>计算机系统的由软硬件共同组成，其中软件又可划分为应用软件和系统软件，操作系统（Operating System，OS）是配置在计算机硬件社上的第一层软件是对硬件系统的首次扩充。管理下层硬件设备，提高设备利用效率，并为上层用户程序提供方便的接口以操作硬件设备完成目标功能即是操作系统的主要功能。</p>
+<p>操作系统的基本特征包括并发、共享、虚拟和异步。</p>
+<ul>
+<li>并发（Concurrence）指同一时间间隔内处理和调度多个程序的能力，主要通过分时得以实现；</li>
+<li>共享（Sharing）指系统中资源可供多个并发执行的进程共享使用，包括互斥共享方式和同时访问方式；</li>
+<li>虚拟（Virtual）指把一个物理上的实体抽象为若干个逻辑上的对应物，虚拟技术包括时分复用技术（如处理器的分时）和空分复用技术（如虚拟存储技术）；</li>
+<li>异步（Asynchronism）指 OS 要保证多个并发执行的进程在同一个环境下多次运行后能获得相同的结果。</li>
+</ul>
+<h2 id="操作系统的目标和作用">操作系统的目标和作用</h2>
+<p>操作系统的设计目标包括方便性、有效性、可扩充性和开放性。</p>
+<ul>
+<li>方便性即提供用户接口，使计算机更方便使用；</li>
+<li>有效性即有效管理和分配软硬件资源以及合理组织计算机工作流程，以改善资源利用率提高系统吞吐量；</li>
+<li>可扩充性是面向未来的，OS 应当适应计算机硬件和体系架构的迅猛发展及其对应的更高的功能和性能要求；</li>
+<li>开放性指适应不同厂家与不同类型的计算机及其设备的网络化集成和协同工作，实现应用程序的可移植性和互操作性；</li>
+</ul>
+<p>操作系统在计算机系统中所起的作用，可从用户、资源管理和资源抽象等角度分析讨论。</p>
+<ul>
+<li>OS 是用户与计算机硬件系统之间的接口，包括面向一般用户的命令式、图形化接口和面向应用程序的<a href="#%E7%A8%8B%E5%BA%8F%E6%8E%A5%E5%8F%A3">系统调用</a>接口；</li>
+<li>OS 是系统资源的管理者，管理对象包括处理器、存储器、各类外围设备以及其信息（数据和软件），管理操作例如资源的分配回收、访问操作、共享保护等；</li>
+<li>OS 实现了对计算机资源的抽象，例如为了方便用户使用 I/O 设备，人们在裸机上铺设一层 I/O 设备管理软件，隐藏具体细节并向用户提供一个对硬件设备操作的抽象模型，用户无需了解硬件物理接口等细节便可用该模型提供的抽象接口使用计算机硬件资源。同理，为了方便用户使用文件系统，可在第一层软件上再覆盖一层用于文件管理的软件，以此类推。由此可知，OS 是铺设在计算机硬件上的多层软件的集合。</li>
+</ul>
+<h1 id="操作系统层次模型">操作系统层次模型</h1>
+<p>笼统地说，操作系统层次模型分为三层，自底向上分别是操作系统对象、操作和管理有关对象的软件集合、用户接口：<br>
+<img src="https://n1000g.github.io/post-images/1639348511445.png" alt="OS 层次模型 1" loading="lazy"><br>
+对这个层次模型以 Linux 或 Unix 系统为例进行细化。由下至上，操作系统内核（Kernel）通过读写硬件接口实现对硬件资源的管理，然后应用程序或命令解释程序（外壳 Shell）通过内核提供的系统调用程序实现用户功能：<br>
+<img src="https://n1000g.github.io/post-images/1639348723935.png" alt="OS 层次模型 2" loading="lazy"></p>
+<h1 id="操作系统接口分类和组成">操作系统接口分类和组成</h1>
+<p>用户接口是系统和用户之间进行交互和信息交换的媒介，方便用户使用和管理计算机系统资源，基于接口表现形式可分为用户交互接口和用户程序接口，前者包括脱机/联机命令接口和图形化用户接口方便一般用户直接使用系统资源，后者方便用户程序访问系统资源，由一组系统调用组成。<br>
+<img src="https://n1000g.github.io/post-images/1639511501081.jpg" alt="用户接口分类" loading="lazy"></p>
+<h2 id="命令接口">命令接口</h2>
+
+                </div>
+              </div>
+              
+                <a class="right" href="https://n1000g.github.io/post/f-vIjJNtK/">
+                  <div class="feature-container" style="background-image: url('https://n1000g.github.io/post-images/f-vIjJNtK.png')">
+                  </div>
+                </a>
+              
+            </article>
+          
+
+          <div class="pagination-container">
+  
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

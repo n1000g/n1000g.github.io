@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>python 数据处理脚本的通用设计 | n1000g</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://n1000g.github.io/favicon.ico?v=1639588181077">
+<link rel="stylesheet" href="https://n1000g.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="常用库
+PyMySQL
+import pymysql
+# 连接
+connection = pymysql.connect(host, user, password, db, port, charset, 
+cursorclass=pymys..." />
+    <meta name="keywords" content="python" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://n1000g.github.io">
+        <img src="https://n1000g.github.io/images/avatar.png?v=1639588181077" class="site-logo">
+        <h1 class="site-title">n1000g</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://n1000g.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/extract" class="site-nav">
+            摘译
+          </a>
+        
+      
+        
+          <a href="about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      早日成长为一只老攻城狮
+    </div>
+    <div class="site-footer">
+      <li>© 2021 GitHub, Inc.</li> | <a class="rss" href="https://n1000g.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">python 数据处理脚本的通用设计</h2>
+            <div class="post-date">2021-07-20</div>
+            
+              <div class="feature-container" style="background-image: url('https://cdn.pixabay.com/photo/2020/10/12/22/15/glass-5650335_960_720.jpg')">
+              </div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="常用库">常用库</h2>
+<h3 id="pymysql"><a href="https://pymysql.readthedocs.io/en/latest/">PyMySQL</a></h3>
+<pre><code class="language-python">import pymysql
+# 连接
+connection = pymysql.connect(host, user, password, db, port, charset, 
+cursorclass=pymysql.cursors.DictCursor)
+cursor = connection.cursor()
+# 处理
+cursor.execute(sql)
+res = cursor.fetchall()  # 查询语句需要 fetch 后 才能执行下一次查询
+# connection.commit()  # 修改语句需要 commit  后 才能执行下一次查询
+# 关闭
+cursor.close()
+connection.close()
+</code></pre>
+<h3 id="openpyxl"><a href="https://openpyxl.readthedocs.io/en/stable/">openpyxl</a></h3>
+<p><strong>写</strong></p>
+<pre><code class="language-python">from openpyxl import Workbook
+
+workbook = Workbook()
+sheet = workbook.active
+sheet['A1'] = 42
+sheet.append([1, 2, 3])
+sheet['A2'] = datetime.datetime.now()
+workbook.save(&quot;sample.xlsx&quot;)
+</code></pre>
+<p><strong>读</strong></p>
+<pre><code class="language-python">from openpyxl import load_workbook
+
+workbook = load_workbook(&quot;excelfile.xlsx&quot;)
+sheets = workbook.sheetnames
+sheet = workbook[sheets[0]]  # sheet = workbook.active
+
+for row in sheet.rows:
+    val = row[0].value
+    print(val)
+</code></pre>
+<h2 id="几个较常用的-sql-写法">几个较常用的 SQL 写法</h2>
+<p>编写代码相对十分耗时且极易出错，复杂度不太高的任务可以用数据库客户端直接解决，总结下一些如按字段讨论、列连接成行的 SQL 写法</p>
+<h3 id="按字段讨论">按字段讨论</h3>
+<p>之前业务升级某些数据前端不再展示，运营要统计某机构下学生离校时间，但这个时间在一张表不同字段表示，正常结课的课程用 <code>closed_time</code>，学生删除的用 <code>dropped_time</code>，班级删除的用 <code>delete_time</code>，</p>
+<pre><code class="language-sql">SELECT id AS '学生id', create_time AS '入校时间',(
+	CASE `status` 
+	WHEN 40 OR 24 THEN dropped_time
+	WHEN -1 THEN closed_time 
+	WHEN 16 THEN dropped_time
+	END
+) AS '离校时间'
+FROM class_student WHERE org_id={0}
+</code></pre>
+<h3 id="多列数据连接成行展示">多列数据连接成行展示</h3>
+<p>如下是统计某一机构下每个班级的学生，要求按班级分类</p>
+<pre><code class="language-sql">SELECT org_id, class_id, GROUP_CONCAT(student_id ORDER BY student_id)
+FROM (
+	SELECT *
+	FROM class_student
+	WHERE org_id=2619
+) t
+GROUP BY class_id
+</code></pre>
+<h2 id="按路径获取文件">按路径获取文件</h2>
+<p>由于系统路径分隔符不一致 Windows 下使用正斜杠分割路径如 <code>C:\Users\n8g\Desktop</code>，Linux 下则使用反斜杠分割路径如 <code>~/Documents</code>，于是在涉及读写本地文件需求相关的操作时，就要考虑代码的通用性，一个较不成熟的解决方案是用 python 标准库 os 做路径拼接处理</p>
+<pre><code class="language-python">FILE_FOLDER = os.getcwd()  # 当前工作路径
+FILE_NAME = &quot;file_to_process.abc&quot;  # 待处理文件
+fo = open(os.path.join(FILE_FOLDER, FILE_NAME), 'r')
+...
+</code></pre>
+<p>多文件</p>
+<pre><code class="language-python">file_name_list = os.listdir(FILE_FOLDER)
+for fname in file_name_list:
+    file_abs_path = os.path.join(FILE_FOLDER, f_name)
+    fo = open(file_abs_path)
+    ...
+...
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://n1000g.github.io/tag/hLCmfG97P/" class="tag">
+                    python
+                  </a>
+                
+              </div>
+            
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

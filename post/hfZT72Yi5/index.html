@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>JPA Criteria Queries | n1000g</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://n1000g.github.io/favicon.ico?v=1639588181077">
+<link rel="stylesheet" href="https://n1000g.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="摘译自 baeldung
+
+
+1. 概述
+在本教程中，我们将讨论一个非常有用的 JPA 特性——标准查询。
+它不仅使我们能够在不使用纯 SQL 的情况下编写查询，而且还为查询提供了一些面向对象的控制，这也即 Hibernate 的主要特性之..." />
+    <meta name="keywords" content="Hibernate,JPA" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://n1000g.github.io">
+        <img src="https://n1000g.github.io/images/avatar.png?v=1639588181077" class="site-logo">
+        <h1 class="site-title">n1000g</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://n1000g.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/extract" class="site-nav">
+            摘译
+          </a>
+        
+      
+        
+          <a href="about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      早日成长为一只老攻城狮
+    </div>
+    <div class="site-footer">
+      <li>© 2021 GitHub, Inc.</li> | <a class="rss" href="https://n1000g.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">JPA Criteria Queries</h2>
+            <div class="post-date">2021-07-26</div>
+            
+              <div class="feature-container" style="background-image: url('https://skuawk.com/skuawk-photos/cities/modestas-1.jpg')">
+              </div>
+            
+            <div class="post-content" v-pre>
+              <p>摘译自 <a href="https://www.baeldung.com/hibernate-criteria-queries#Criteria">baeldung</a></p>
+<!-- more -->
+<hr>
+<h2 id="1-概述">1. 概述</h2>
+<p>在本教程中，我们将讨论一个非常有用的 JPA 特性——标准查询。</p>
+<p>它不仅使我们能够在不使用纯 SQL 的情况下编写查询，而且还为查询提供了一些面向对象的控制，这也即 Hibernate 的主要特性之一。Criteria API 允许我们以编程的方式构建一个应用不同的过滤规则和逻辑条件的 Criteria 查询对象。</p>
+<p>从Hibernate 5.2开始，Hibernate Criteria API 就被弃用了，新的开发集中在 JPA Criteria API 上。我们将探索如何使用Hibernate和JPA来构建Criteria Queries。</p>
+<h2 id="2-maven-依赖">2. Maven 依赖</h2>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.hibernate&lt;/groupId&gt;
+    &lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;   
+    &lt;version&gt;5.3.2.Final&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h2 id="3-简单示例">3. 简单示例</h2>
+<p>我们以如何从数据库中获取特定类（Item）的所有实例为例：</p>
+<pre><code class="language-java">public class Item implements Serializable {
+
+    private Integer itemId;
+    private String itemName;
+    private String itemDescription;
+    private Integer itemPrice;
+
+   // standard setters and getters
+}
+</code></pre>
+<p>它的 Criteria Query 如下：</p>
+<pre><code class="language-java">public List&lt;T&gt; getAll() {
+    Session session = HibernateUtil.getHibernateSession();
+    CriteriaBuilder cb = session.getCriteriaBuilder();
+    CriteriaQuery&lt;Item&gt; cr = cb.createQuery(Item.class);
+    Root&lt;Item&gt; root = cr.from(Item.class);
+    cr.select(root);
+    Query&lt;Item&gt; query = session.createQuery(cr);
+    return query.getResultList();
+}
+</code></pre>
+<p>上面的查询是如何获取所有项的简单演示。让我们一步一步来看看我们做了什么：</p>
+<ol>
+<li>从 SessionFactory 对象创建一个 Session 实例</li>
+<li>通过调用 getCriteriaBuilder() 方法创建一个 CriteriaBuilder 实例</li>
+<li>通过调用 CriteriaBuilder 的 createQuery()方法创建一个 CriteriaQuery 实例</li>
+<li>通过调用 Session 的 createQuery() 方法创建 Query 的实例</li>
+<li>调用查询对象的getResultList()方法，它将给出结果</li>
+</ol>
+<pre><code class="language-mermaid">graph LR;
+    SessionFactory --&gt; Session;
+    Session --&gt; CriteriaBuilder;
+    subgraph build criteriaQuery;
+    	CriteriaBuilder --Item.class--&gt; CriteriaQuery;
+    	Root --Item.class--&gt; CriteriaQuery;
+    end;
+    CriteriaQuery --&gt; Query;
+    Query --&gt; results;
+</code></pre>
+<p>现在我们已经介绍了基础知识，让我们继续了解条件查询的一些特性:</p>
+<h3 id="31-expressions">3.1 Expressions</h3>
+<p>CriteriaBuilder 可用于基于特定条件限制查询结果：</p>
+<h4 id="where-子句">Where 子句</h4>
+<pre><code class="language-java">// where itemPrice &gt; 1000
+cr.select(root).where(cb.gt(root.get(&quot;itemPrice&quot;), 1000));
+// where itemPrice &lt; 1000
+cr.select(root).where(cb.lt(root.get(&quot;itemPrice&quot;), 1000));
+// Items having itemName contain Chair
+cr.select(root).where(cb.like(root.get(&quot;itemName&quot;), &quot;%chair%&quot;));
+// To check if the given property is not null:
+cr.select(root).where(cb.isNotNull(root.get(&quot;itemDescription&quot;)));
+</code></pre>
+<h4 id="表达式链">表达式链</h4>
+<pre><code class="language-java">Predicate[] predicates = new Predicate[2];
+predicates[0] = cb.isNull(root.get(&quot;itemDescription&quot;));
+predicates[1] = cb.like(root.get(&quot;itemName&quot;), &quot;chair%&quot;);
+cr.select(root).where(predicates);
+// or
+cr.select(root).where(cb.or(predicates[0], predicates[1]));
+// and
+cr.select(root).where(cb.and(predicates[0], predicates[1]));
+</code></pre>
+<h3 id="32-sorting">3.2 Sorting</h3>
+<pre><code class="language-java">cr.orderBy(
+  cb.asc(root.get(&quot;itemName&quot;)), 
+  cb.desc(root.get(&quot;itemPrice&quot;)));
+</code></pre>
+<h3 id="33-projections-aggregates-and-grouping-functions">3.3 Projections, Aggregates, and Grouping Functions</h3>
+<pre><code class="language-java">cr.select(cb.count(root));
+cr.select(cb.avg(root.get(&quot;itemPrice&quot;)));
+</code></pre>
+<h3 id="34-criteriaupdate">3.4 CriteriaUpdate</h3>
+<p>CriteriaUpdate 有一个 set() 方法，可以用来为数据库记录提供新值:</p>
+<pre><code class="language-java">CriteriaUpdate&lt;Item&gt; criteriaUpdate = cb.createCriteriaUpdate(Item.class);Root&lt;Item&gt; root = criteriaUpdate.from(Item.class);criteriaUpdate.set(&quot;itemPrice&quot;, newPrice);criteriaUpdate.where(cb.equal(root.get(&quot;itemPrice&quot;), oldPrice));Transaction transaction = session.beginTransaction();session.createQuery(criteriaUpdate).executeUpdate();transaction.commit();
+</code></pre>
+<h3 id="35-criteriadelete">3.5 CriteriaDelete</h3>
+<pre><code class="language-java">CriteriaDelete&lt;Item&gt; criteriaDelete = cb.createCriteriaDelete(Item.class);Root&lt;Item&gt; root = criteriaDelete.from(Item.class);criteriaDelete.where(cb.greaterThan(root.get(&quot;itemPrice&quot;), targetPrice));Transaction transaction = session.beginTransaction();session.createQuery(criteriaDelete).executeUpdate();transaction.commit();
+</code></pre>
+<h2 id="相对-hql-的优势">相对 HQL 的优势</h2>
+<ul>
+<li><strong>Object Oriented</strong></li>
+<li>flexible</li>
+<li>type-safety</li>
+</ul>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://n1000g.github.io/tag/zEpeqHzQr/" class="tag">
+                    Hibernate
+                  </a>
+                
+                  <a href="https://n1000g.github.io/tag/RlUsxFbwFJ/" class="tag">
+                    JPA
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://n1000g.github.io/post/zIn7XAv_S/">
+                  <h3 class="post-title">
+                    python 数据处理脚本的通用设计
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>
