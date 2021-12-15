@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://n1000g.github.io/favicon.ico?v=1639589750834">
+<link rel="shortcut icon" href="https://n1000g.github.io/favicon.ico?v=1639592315331">
 <link rel="stylesheet" href="https://n1000g.github.io/styles/main.css">
 
 
@@ -18,12 +18,11 @@
 
 
 
-    <meta name="description" content="译自baeldung
+    <meta name="description" content="译自 baeldung
+本文将系统介绍 Spring 中用于注册 Bean 对象的两个重要注解 @Import 和 @ComponentScan 的联系与区别，以及它们各自的适用场景。
 
-Similarities
-两者都可以接收任何 @Component 或 @Configuration 注解的类（Bean 和配置类）
-下面是使用 @Import 注册 Bean 的例子：
-@Configuration..." />
+联系
+两者都可以接收任何 @Component 或 ..." />
     <meta name="keywords" content="Spring" />
   </head>
   <body>
@@ -33,7 +32,7 @@ Similarities
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://n1000g.github.io">
-        <img src="https://n1000g.github.io/images/avatar.png?v=1639589750834" class="site-logo">
+        <img src="https://n1000g.github.io/images/avatar.png?v=1639592315331" class="site-logo">
         <h1 class="site-title">n1000g</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -108,9 +107,10 @@ Similarities
               </div>
             
             <div class="post-content" v-pre>
-              <p>译自<a href="https://www.baeldung.com/spring-import-annotation">baeldung</a></p>
+              <p>译自 <a href="https://www.baeldung.com/spring-import-annotation">baeldung</a><br>
+本文将系统介绍 Spring 中用于注册 Bean 对象的两个重要注解 <code>@Import</code> 和 <code>@ComponentScan</code> 的联系与区别，以及它们各自的适用场景。</p>
 <!-- more -->
-<h2 id="similarities">Similarities</h2>
+<h2 id="联系">联系</h2>
 <p>两者都可以接收任何 <code>@Component</code> 或 <code>@Configuration</code> 注解的类（Bean 和配置类）</p>
 <p>下面是使用 <code>@Import</code> 注册 Bean 的例子：</p>
 <pre><code class="language-java">@Configuration
@@ -122,16 +122,16 @@ class BugConfig {
 class Bug {
 }
 </code></pre>
-<h2 id="conceptual-sup概念上的sup-difference">Conceptual <sup>概念上的</sup> Difference</h2>
+<h2 id="概念上的区别subconceptual-differencessub">概念上的区别<sub>Conceptual Differences</sub></h2>
 <p>简单地说，我们可以用这两个注释得到相同的结果。那么，它们之间有什么区别？</p>
-<p>要回答这个问题，让我们记住 Spring 通常提倡约定高于配置的方法。</p>
+<p>要回答这个问题，让我们记住 Spring 通常提倡<strong>约定高于配置</strong>的方法。</p>
 <p>与我们的注释进行类比，<code>@ComponentScan</code> 更像是约定，而 <code>@Import</code> 更像是配置。</p>
-<h2 id="what-happens-in-real-applications">What Happens in Real Applications</h2>
+<h2 id="实际应用中真正发生了什么">实际应用中真正发生了什么</h2>
 <p>通常，我们在根包中使用 <code>@ComponentScan</code> 启动应用程序，这样它就可以为我们找到所有组件。正如 Spring Boot 中 <code>@SpringBootApplication</code> 已经包含了 <code>@ComponentScan</code>。这显示了约定的力量。<br>
 现在，让我们假设我们的应用程序扩展了很多。现在我们需要处理来自所有不同地方的 bean，比如组件、不同的包结构，以及我们自己和第三方构建的模块。<br>
 在这种情况下，将所有内容添加到上下文可能会引发关于使用哪个bean的冲突。除此之外，我们的启动时间可能会比较慢。另一方面，我们也不想为每个新组件都写一个 <code>@Import</code>，因为这样做会适得其反。<br>
 以我们的动物为例。我们确实可以在上下文声明中隐藏导入，但是我们仍然需要记住每个 Config 类的 <code>@Import</code>。</p>
-<h2 id="working-together">Working Together</h2>
+<h2 id="协同使用两者">协同使用两者</h2>
 <p>我们也可以以兼顾两者为目标。试想，我们有一个只包含 animals 的包（或组件或模块等等）。</p>
 <p>这个包上有一个 <code>@ComponentScan</code> 注解</p>
 <pre><code class="language-java">package com.baeldung.importannotation.animal;
