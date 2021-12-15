@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://n1000g.github.io</id>
     <title>n1000g</title>
-    <updated>2021-12-15T18:18:43.702Z</updated>
+    <updated>2021-12-15T21:43:52.772Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://n1000g.github.io"/>
     <link rel="self" href="https://n1000g.github.io/atom.xml"/>
@@ -10,6 +10,405 @@
     <logo>https://n1000g.github.io/images/avatar.png</logo>
     <icon>https://n1000g.github.io/favicon.ico</icon>
     <rights>All rights reserved 2021, n1000g</rights>
+    <entry>
+        <title type="html"><![CDATA[【OS 基础课笔记】经典进程同步问题的记录型信号量机制解决方案]]></title>
+        <id>https://n1000g.github.io/post/KKnYhVDri/</id>
+        <link href="https://n1000g.github.io/post/KKnYhVDri/">
+        </link>
+        <updated>2021-12-15T16:39:19.000Z</updated>
+        <summary type="html"><![CDATA[<p>进程同步问题<br>
+信号量（Semaphore）机制由圣 Dijkstra 于1956 年提出，是一种卓有成效的进程同步工具，现已被广泛运用在各类单处理机、多处理机和网络系统中。其中的记录型信号量机制今已成为考研操作系统重要考点。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>进程同步问题<br>
+信号量（Semaphore）机制由圣 Dijkstra 于1956 年提出，是一种卓有成效的进程同步工具，现已被广泛运用在各类单处理机、多处理机和网络系统中。其中的记录型信号量机制今已成为考研操作系统重要考点。</p>
+<!-- more -->
+<h2 id="1-记录型信号量机制">1. 记录型信号量机制</h2>
+<p>除了初始化操作外，信号量只能通过两个原子操作 <code>wait()</code> 和 <code>signal()</code>，也称 P 操作和 V 操作。其中记录型信号量定义为 ① 一个整型的 <code>S-&gt;value</code> 表示资源数目（大于 0）或阻塞队列的长度（小于 0）；② 进程列表 <code>S-&gt;list</code> 表示阻塞在该信号量上的进程队列。<br>
+当 <code>S-&gt;value</code> 定义为 1 时，记录型信号量转化为互斥信号量表示一个用于互斥访问的临界资源。</p>
+<p>记录型信号量的数据结构和 P、V 操作描述如下：</p>
+<pre><code class="language-c">/**
+ * 记录型信号量的进程阻塞队列
+ */
+typedef struct process_control_block {
+    int pid; // 进程标识符
+    struct process_control_block * next; // 队列指针
+} process_control_block;
+
+/**
+ * semaphore 记录型信号量
+ */
+typedef struct {
+    int value; // 资源数量
+    process_control_block * list; // 阻塞队列头
+} semaphore;
+
+void wait(semaphore * S) {
+    S-&gt;value --;
+    if (S-&gt;value &lt; 0) block(S-&gt;list);
+}
+
+void signal(semaphore * S) {
+    S-&gt;value ++;
+    if (S-&gt;value &lt;= 0) wakeup(S-&gt;list);
+}
+</code></pre>
+<p>其中 block() 和 wakeup() 是操作系统原语，分别用于 阻塞 和 唤醒 进程。</p>
+<h2 id="2-生产者-消费者问题">2. 生产者-消费者问题</h2>
+<blockquote>
+<p>生产者消费者问题（英语：Producer-consumer problem），也称有限缓冲问题（Bounded-buffer problem），是一个多进程同步问题的经典案例。该问题描述了共享固定大小缓冲区的两个进程——即所谓的“生产者”和“消费者”——在实际运行时会发生的问题。生产者的主要作用是生成一定量的数据放到缓冲区中，然后重复此过程。与此同时，消费者也在缓冲区消耗这些数据。该问题的关键就是要保证生产者不会在缓冲区满时加入数据，消费者也不会在缓冲区中空时消耗数据。</p>
+</blockquote>
+<h3 id="21-基于循环缓冲的解决方案">2.1 基于循环缓冲的解决方案</h3>
+<p>假定缓冲池中有 n 个缓冲区并用循环结构组织，可以利用互斥信号量 mutex 实现各进程对缓冲池的互斥使用，用信号量 empty 和 full 分别表示缓冲池中空缓冲和满缓冲资源的数目。</p>
+<pre><code class="language-c">int in = 0, out = 0;
+item buffer[n];
+semaphore mutex = 1, full = 0, empty = n;
+/**
+ * 生产者进程——
+ * 申请空缓冲并生产数据项，如果无空缓冲区资源则自我阻塞直到被空缓冲区资源唤醒
+ * 需注意缓冲池资源的互斥访问
+ */
+void producer() {
+    do {
+        item nextp = produce_an_item();
+        P(empty);
+        P(mutex);
+        buffer[in] = nextp;
+        in = (in+1) % n;
+        V(mutex);
+        V(full);
+    } while(true);
+}
+
+/**
+ * 消费者进程——
+ * 申请满缓冲区并消费数据项，如果无满缓冲区资源则自我阻塞直到被满缓冲区资源唤醒
+ */
+void consumer() {
+    do {
+        P(full);
+        P(mutex);
+        item nextc = buffer[out];
+        out = (out+1) % n;
+        V(mutex);
+        V(empty);
+        consume_the_item(nextc);
+    } while (true);
+}
+</code></pre>
+<p>主程序描述</p>
+<pre><code class="language-c">void main() {
+    cobegin
+        producer(); consumer();
+    coend
+}
+</code></pre>
+<h3 id="22-基于单缓冲的但生产者-单消费者类同步问题">2.2 基于单缓冲的但生产者-单消费者类同步问题</h3>
+<p>在测控系统中，数据采集任务将数据送入一单缓冲区，计算任务对该但缓冲区中数据取出并做计算处理。在这类问题中，信号量 full 和 empty 已经可以表示单缓冲资源的互斥属性了，相对 2.1 的代码描述，可以不再定义互斥信号量 mutex。</p>
+<h2 id="3-哲学家进餐问题">3. 哲学家进餐问题</h2>
+<p>由圣 Dijkstra 于1971 年提出并解决的用来演示在并发计算中多线程同步时产生的问题，旨在说明避免死锁和资源耗尽等问题。它的具体描述如下：</p>
+<blockquote>
+<p>有五个哲学家，他们的生活方式是交替地进行思考和进餐，哲学家们共用一张圆桌，分别坐在周围的五张椅子上，在圆桌上有五个碗和五支筷子，平时哲学家进行思考，饥饿时便试图取其左、右最靠近他的筷子，只有在他拿到两支筷子时才能进餐，该哲学家进餐完毕后，放下左右两只筷子又继续思考。</p>
+</blockquote>
+<h3 id="31-信号量定义和哲学家活动描述">3.1 信号量定义和哲学家活动描述</h3>
+<p>筷子作为临界资源，一段时间仅允许一位哲学家使用，为了实现对筷子的互斥使用，可以为每根筷子设置一个互斥信号量，于是第 i 位 哲学家的活动可描述为</p>
+<pre><code class="language-c">/**
+ * 临界资源筷子
+ */
+semaphore chopstick[5] = {1, 1, 1, 1, 1}; 
+/**
+ * 第 i 位哲学家
+ */
+void philosopher_i() {
+    do {
+        P(chopstick[i]);
+        P(chopstick[(i+1) % 5]);
+        // eat
+        V(chopstick[i]);
+        V(chopstick[(i+1) % 5]);
+        // think
+    } while (true);
+}
+</code></pre>
+<h3 id="32-存在问题分析和进一步解决方案">3.2 存在问题分析和进一步解决方案</h3>
+<p>上述方案中，每个哲学家先拿起左边筷子再拿起右边筷子，不会出现相邻的两个哲学家竞争同一根筷子的情况，但可能出现每个哲学家同时饥饿并拿起自己左边的筷子，引起死锁。</p>
+<p>为了避免死锁，有如下三种解决方案：</p>
+<ol>
+<li>双筷同举——当且仅当拿起两根筷子才允许进餐</li>
+<li>奇偶有别——1、3、5 号哲学家先左后右，2、4 号哲学家先右后左</li>
+<li>进餐限制——最多允许 4 根筷子被同时申请</li>
+</ol>
+<p>代码描述分别如下：</p>
+<pre><code class="language-c">/**
+ * 1. 双筷齐举
+ * 设置一个互斥信号量，同一时间只允许一个进程做申请资源 wait 操作
+ * 可以解决死锁问题，但是显然进程并发性变差
+ */
+semaphore mutex = 1;
+
+void philosopher_i() {
+    do {
+        P(mutex);
+        P(chopstick[i]);
+        P(chopstick[(i+1) % 5]);
+        V(mutex);
+        // eat
+        V(chopstick[i]);
+        V(chopstick[(i+1) % 5]);
+        // think
+    } while (true);
+}
+
+/**
+ * 2. 奇偶有别
+ * 1、3、5 号哲学家先申请 i 号筷子后申请 (i+1) % 5 号筷子
+ * 2、4 号哲学家先申请  (i+1) % 5 号筷子后申请 i 号 筷子
+ * 经分析，解决了死锁问题
+ */
+// 实现略
+
+/**
+ * 3. 进餐限数
+ * 设置一个初始化值为 4 资源信号量表示申请资源的权力
+ * 最多只允许 4 个哲学家在申请筷子资源
+ * 可以解决死锁问题，而进程并发性也未变差
+ */
+semaphore limit = 4;
+
+void philosopher_i() {
+    do {
+        P(limit);
+        P(chopstick[i]);
+        P(chopstick[(i+1) % 5]);
+        V(limit);
+        // eat
+        V(chopstick[i]);
+        V(chopstick[(i+1) % 5]);
+        // think
+    } while (true);
+}
+</code></pre>
+<h3 id="33-其他资料">3.3 其他资料</h3>
+<blockquote>
+<p><a href="https://leetcode-cn.com/problems/the-dining-philosophers/">https://leetcode-cn.com/problems/the-dining-philosophers/</a></p>
+</blockquote>
+<h2 id="4-读者-写者问题">4. 读者-写者问题</h2>
+<p>读者-写者问题常用于测试新同步原语，其问题描述如下：<br>
+多个进程共享一个数据对象，只要求读的进程称读者进程，有写或修改要求的进程称写者进程。读操作可由多个读者进程同时执行，而写操作具有排他性。</p>
+<h3 id="41-读者优先">4.1 读者优先</h3>
+<p>下图是读者-写者问题的读者优先解决方案也即一般化的解决方案<br>
+<img src="https://n1000g.github.io/post-images/1639600123226.png" alt="读者优先" loading="lazy"></p>
+<p>即第一个到来的读者进程和其他写者进程一同竞争数据对象的资源信号量，如果发现资源所有者为读者进程，新来的读者进程可以跳过申请，直接进行读操作。而实现这个过程又需要对读者进程进行计数：</p>
+<ul>
+<li>考虑到写者进程要与其他进程互斥执行，设置写互斥信号量 wmutex；</li>
+<li>读者进程之间可并发执行，设置计数变量 readercount 初始为 0；</li>
+<li>readercount 对于多个读者进程而言是临界资源，应为之设立互斥信号量 rmutex。</li>
+</ul>
+<pre><code class="language-c">int readercount = 0;
+semaphore rmutex = 1, wmutex = 1;
+/**
+ * 写者进程——互斥访问
+ */
+void writer() {
+    do {
+        P(wmutex);
+        写操作
+        V(wmutex);
+    } while(true);
+}
+
+/**
+ * 读者进程——
+ * 系统中只存在的当前唯一的读者进程 0 时，与写者进程竞争临界资源
+ * 访问 readercount 并计数
+ */
+void reader() {
+    do {
+        P(rmutex);
+        if (readercount == 0) P(wmutex);
+        readercount++;
+        V(rmutex);
+        读操作
+        P(rmutex);
+        readercount--;
+        if (readercount == 0) V(wmutex);
+        V(rmutex);
+    } while (true);
+}
+</code></pre>
+<p>主程序描述</p>
+<pre><code class="language-c">void main() {
+    cobegin
+        reader₁(); reader₂(); ...
+        writer₁(); writer₂(); ...
+    coend
+}
+</code></pre>
+<h3 id="42-公平型读者-写者问题即解决方案">4.2 公平型读者-写者问题即解决方案</h3>
+<p>上述解决方案对写者进程来说，一旦系统中有读者进程在进行读操作，就必须等待，直到 readercount 等于 0。要消除这个读者优先，实现新来进程无论是读者还是写者都阻塞于同一队列，公平竞争临界资源，即“公平型读者-写者问题”的解决方案如下：<br>
+<img src="https://n1000g.github.io/post-images/1639601542576.png" alt="公平型读者写者" loading="lazy"></p>
+<p>如图，设置一个互斥信号量 S，读者进程和写者进程都需要先竞争 S，再进行之前的操作，使得阻塞在 S 上的进程是什么属性都无所谓，实现公平竞争。</p>
+<pre><code class="language-c">int readercount = 0;
+semaphore rmutex = 1, wmutex = 1, S = 1;
+/**
+ * 写者进程
+ */
+void writer() {
+    do {
+        P(S);
+        P(wmutex)
+        V(S);
+        写操作
+        V(wmutex);
+    } while(true);
+}
+
+/**
+ * 读者进程
+ */
+void reader() {
+    do {
+        P(S);
+        P(rmutex);
+        if (readercount == 0) P(wmutex);
+        readercount++;
+        V(rmutex);
+        V(S);
+        读操作
+        P(rmutex);
+        readercount--;
+        if (readercount == 0) V(wmutex);
+        V(rmutex);
+    } while (true);
+}
+</code></pre>
+<h3 id="43-写者优先">4.3 写者优先</h3>
+<p>如题。<br>
+<img src="https://n1000g.github.io/post-images/1639601905558.png" alt="写者优先" loading="lazy"></p>
+<p>仅第一个到达的写者进程与读者进程一起去 S 处排队</p>
+<pre><code class="language-c">int readercount = 0, writercount = 0;
+semaphore rmutex = 1, wmutex = 1, S = 1, mutex = 1;
+/**
+ * 写者进程——添加了与读者优先解决方案中与读者相似的逻辑
+ */
+void writer() {
+    do {
+        P(mutex);
+        if (writercount == 0) P(S);
+        writercount ++;
+        V(mutex);
+
+        P(wmutex)
+        写操作
+        V(wmutex);
+        
+        P(mutex);
+        writercount --;
+        if (writercount == 0) V(S);
+        V(mutex);
+    } while(true);
+}
+
+/**
+ * 读者进程——同 4.3
+ */
+void reader() {
+    do {
+        P(S);
+        P(rmutex);
+        if (readercount == 0) P(wmutex);
+        readercount++;
+        V(rmutex);
+        V(S);
+        读操作
+        P(rmutex);
+        readercount--;
+        if (readercount == 0) V(wmutex);
+        V(rmutex);
+    } while (true);
+}
+</code></pre>
+<h3 id="44-限定读者问题">4.4 限定读者问题</h3>
+<p>如题<br>
+可增设 rmax 信号量，使多出来的读者进程阻塞至此。</p>
+<pre><code class="language-c">int readercount = 0;
+semaphore rmutex = 1, wmutex = 1;
+/**
+ * 写者进程——同 4.1
+ */
+void writer() {
+    do {
+        P(wmutex);
+        写操作
+        V(wmutex);
+    } while(true);
+}
+
+/**
+ * 读者进程——多余读者挂至 rmax 信号量阻塞队列
+ */
+void reader() {
+    do {
+        P(rmax);
+
+        P(rmutex);
+        if (readercount == 0) P(wmutex);
+        readercount++;
+        V(rmutex);
+        读操作
+        P(rmutex);
+        readercount--;
+        if (readercount == 0) V(wmutex);
+        V(rmutex);
+
+        V(rmax);
+    } while (true);
+}
+</code></pre>
+<h2 id="5-独木桥-单行道问题">5. 独木桥、单行道问题</h2>
+<p>如题，南北通车，单行道上只能走同一方向的车辆。使用记录型信号量模拟道路情况。<br>
+分析：两个方向的车辆基本性质完全相同，均类似读者-写者问题中写者进程。使每类第一个到达的进程与另一类进程竞争单行道这一临界资源。</p>
+<pre><code class="language-c">/**
+ * 南边来的和北边来的车辆数量
+ * 和临界资源——单行道
+ */
+int southcount = 0, northcount = 0;
+semaphore road = 1;
+/**
+ * 模拟由南向北的车辆
+ */
+void S2N() {
+    do {
+        P(smutex);
+        if (southcount == 0) P(road);
+        southcount++;
+        V(smutex);
+        通过单行道
+        P(smutex);
+        southcount--;
+        if (southcount == 0) V(road);
+        V(smutex);
+    } while (true);
+}
+
+/**
+ * 模拟由北向南的车辆
+ */
+void N2S() {
+    do {
+        P(nmutex);
+        if (northcount == 0) P(road);
+        northcount++;
+        V(nmutex);
+        通过单行道
+        P(nmutex);
+        northcount--;
+        if (northcount == 0) V(road);
+        V(nmutex);
+    } while (true);
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[【OS 基础课笔记】一、操作系统引论]]></title>
         <id>https://n1000g.github.io/post/f-vIjJNtK/</id>
