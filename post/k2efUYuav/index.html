@@ -1,426 +1,111 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://n1000g.github.io</id>
-    <title>n1000g</title>
-    <updated>2021-12-17T00:05:47.293Z</updated>
-    <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://n1000g.github.io"/>
-    <link rel="self" href="https://n1000g.github.io/atom.xml"/>
-    <subtitle>早日成长为一只老攻城狮</subtitle>
-    <logo>https://n1000g.github.io/images/avatar.png</logo>
-    <icon>https://n1000g.github.io/favicon.ico</icon>
-    <rights>All rights reserved 2021, n1000g</rights>
-    <entry>
-        <title type="html"><![CDATA[【OS 基础课笔记】经典进程同步问题的记录型信号量机制解决方案]]></title>
-        <id>https://n1000g.github.io/post/KKnYhVDri/</id>
-        <link href="https://n1000g.github.io/post/KKnYhVDri/">
-        </link>
-        <updated>2021-12-15T16:39:19.000Z</updated>
-        <summary type="html"><![CDATA[<p>信号量（Semaphore）机制由圣 Dijkstra 于1956 年提出，是一种卓有成效的进程同步工具，现已被广泛运用在各类单处理机、多处理机和网络系统中。其中的记录型信号量机制今已成为考研操作系统重要考点。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>信号量（Semaphore）机制由圣 Dijkstra 于1956 年提出，是一种卓有成效的进程同步工具，现已被广泛运用在各类单处理机、多处理机和网络系统中。其中的记录型信号量机制今已成为考研操作系统重要考点。</p>
-<!-- more -->
-<h2 id="1-记录型信号量机制">1. 记录型信号量机制</h2>
-<p>除了初始化操作外，信号量只能通过两个原子操作 <code>wait()</code> 和 <code>signal()</code>，也称 P 操作和 V 操作。其中记录型信号量定义为 ① 一个整型的 <code>S-&gt;value</code> 表示资源数目（大于 0）或阻塞队列的长度（小于 0）；② 进程列表 <code>S-&gt;list</code> 表示阻塞在该信号量上的进程队列。<br>
-当 <code>S-&gt;value</code> 定义为 1 时，记录型信号量转化为互斥信号量表示一个用于互斥访问的临界资源。</p>
-<p>记录型信号量的数据结构和 P、V 操作描述如下：</p>
-<pre><code class="language-c">/**
- * 记录型信号量的进程阻塞队列
- */
-typedef struct process_control_block {
-    int pid; // 进程标识符
-    struct process_control_block * next; // 队列指针
-} process_control_block;
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
 
-/**
- * semaphore 记录型信号量
- */
-typedef struct {
-    int value; // 资源数量
-    process_control_block * list; // 阻塞队列头
-} semaphore;
+<title>【OS 基础课笔记】二、进程管理 | n1000g</title>
 
-void wait(semaphore * S) {
-    S-&gt;value --;
-    if (S-&gt;value &lt; 0) block(S-&gt;list);
-}
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-void signal(semaphore * S) {
-    S-&gt;value ++;
-    if (S-&gt;value &lt;= 0) wakeup(S-&gt;list);
-}
-</code></pre>
-<p>其中 block() 和 wakeup() 是操作系统原语，分别用于 阻塞 和 唤醒 进程。</p>
-<h2 id="2-生产者-消费者问题">2. 生产者-消费者问题</h2>
-<blockquote>
-<p>生产者消费者问题（英语：Producer-consumer problem），也称有限缓冲问题（Bounded-buffer problem），是一个多进程同步问题的经典案例。该问题描述了共享固定大小缓冲区的两个进程——即所谓的“生产者”和“消费者”——在实际运行时会发生的问题。生产者的主要作用是生成一定量的数据放到缓冲区中，然后重复此过程。与此同时，消费者也在缓冲区消耗这些数据。该问题的关键就是要保证生产者不会在缓冲区满时加入数据，消费者也不会在缓冲区中空时消耗数据。</p>
-</blockquote>
-<h3 id="21-基于循环缓冲的解决方案">2.1 基于循环缓冲的解决方案</h3>
-<p>假定缓冲池中有 n 个缓冲区并用循环结构组织，可以利用互斥信号量 mutex 实现各进程对缓冲池的互斥使用，用信号量 empty 和 full 分别表示缓冲池中空缓冲和满缓冲资源的数目。</p>
-<pre><code class="language-c">int in = 0, out = 0;
-item buffer[n];
-semaphore mutex = 1, full = 0, empty = n;
-/**
- * 生产者进程——
- * 申请空缓冲并生产数据项，如果无空缓冲区资源则自我阻塞直到被空缓冲区资源唤醒
- * 需注意缓冲池资源的互斥访问
- */
-void producer() {
-    do {
-        item nextp = produce_an_item();
-        P(empty);
-        P(mutex);
-        buffer[in] = nextp;
-        in = (in+1) % n;
-        V(mutex);
-        V(full);
-    } while(true);
-}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://n1000g.github.io/favicon.ico?v=1639699533986">
+<link rel="stylesheet" href="https://n1000g.github.io/styles/main.css">
 
-/**
- * 消费者进程——
- * 申请满缓冲区并消费数据项，如果无满缓冲区资源则自我阻塞直到被满缓冲区资源唤醒
- */
-void consumer() {
-    do {
-        P(full);
-        P(mutex);
-        item nextc = buffer[out];
-        out = (out+1) % n;
-        V(mutex);
-        V(empty);
-        consume_the_item(nextc);
-    } while (true);
-}
-</code></pre>
-<p>主程序描述</p>
-<pre><code class="language-c">void main() {
-    cobegin
-        producer(); consumer();
-    coend
-}
-</code></pre>
-<h3 id="22-基于单缓冲的但生产者-单消费者类同步问题">2.2 基于单缓冲的但生产者-单消费者类同步问题</h3>
-<p>在测控系统中，数据采集任务将数据送入一单缓冲区，计算任务对该但缓冲区中数据取出并做计算处理。在这类问题中，信号量 full 和 empty 已经可以表示单缓冲资源的互斥属性了，相对 2.1 的代码描述，可以不再定义互斥信号量 mutex。</p>
-<h2 id="3-哲学家进餐问题">3. 哲学家进餐问题</h2>
-<p>由圣 Dijkstra 于1971 年提出并解决的用来演示在并发计算中多线程同步时产生的问题，旨在说明避免死锁和资源耗尽等问题。它的具体描述如下：</p>
-<blockquote>
-<p>有五个哲学家，他们的生活方式是交替地进行思考和进餐，哲学家们共用一张圆桌，分别坐在周围的五张椅子上，在圆桌上有五个碗和五支筷子，平时哲学家进行思考，饥饿时便试图取其左、右最靠近他的筷子，只有在他拿到两支筷子时才能进餐，该哲学家进餐完毕后，放下左右两只筷子又继续思考。</p>
-</blockquote>
-<h3 id="31-信号量定义和哲学家活动描述">3.1 信号量定义和哲学家活动描述</h3>
-<p>筷子作为临界资源，一段时间仅允许一位哲学家使用，为了实现对筷子的互斥使用，可以为每根筷子设置一个互斥信号量，于是第 i 位 哲学家的活动可描述为</p>
-<pre><code class="language-c">/**
- * 临界资源筷子
- */
-semaphore chopstick[5] = {1, 1, 1, 1, 1}; 
-/**
- * 第 i 位哲学家
- */
-void philosopher_i() {
-    do {
-        P(chopstick[i]);
-        P(chopstick[(i+1) % 5]);
-        // eat
-        V(chopstick[i]);
-        V(chopstick[(i+1) % 5]);
-        // think
-    } while (true);
-}
-</code></pre>
-<h3 id="32-存在问题分析和进一步解决方案">3.2 存在问题分析和进一步解决方案</h3>
-<p>上述方案中，每个哲学家先拿起左边筷子再拿起右边筷子，不会出现相邻的两个哲学家竞争同一根筷子的情况，但可能出现每个哲学家同时饥饿并拿起自己左边的筷子，引起死锁。</p>
-<p>为了避免死锁，有如下三种解决方案：</p>
-<ol>
-<li>双筷同举——当且仅当拿起两根筷子才允许进餐</li>
-<li>奇偶有别——1、3、5 号哲学家先左后右，2、4 号哲学家先右后左</li>
-<li>进餐限制——最多允许 4 根筷子被同时申请</li>
-</ol>
-<p>代码描述分别如下：</p>
-<pre><code class="language-c">/**
- * 1. 双筷齐举
- * 设置一个互斥信号量，同一时间只允许一个进程做申请资源 wait 操作
- * 可以解决死锁问题，但是显然进程并发性变差
- */
-semaphore mutex = 1;
 
-void philosopher_i() {
-    do {
-        P(mutex);
-        P(chopstick[i]);
-        P(chopstick[(i+1) % 5]);
-        V(mutex);
-        // eat
-        V(chopstick[i]);
-        V(chopstick[(i+1) % 5]);
-        // think
-    } while (true);
-}
 
-/**
- * 2. 奇偶有别
- * 1、3、5 号哲学家先申请 i 号筷子后申请 (i+1) % 5 号筷子
- * 2、4 号哲学家先申请  (i+1) % 5 号筷子后申请 i 号 筷子
- * 经分析，解决了死锁问题
- */
-// 实现略
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
-/**
- * 3. 进餐限数
- * 设置一个初始化值为 4 资源信号量表示申请资源的权力
- * 最多只允许 4 个哲学家在申请筷子资源
- * 可以解决死锁问题，而进程并发性也未变差
- */
-semaphore limit = 4;
 
-void philosopher_i() {
-    do {
-        P(limit);
-        P(chopstick[i]);
-        P(chopstick[(i+1) % 5]);
-        V(limit);
-        // eat
-        V(chopstick[i]);
-        V(chopstick[(i+1) % 5]);
-        // think
-    } while (true);
-}
-</code></pre>
-<h3 id="33-其他资料">3.3 其他资料</h3>
-<blockquote>
-<p><a href="https://leetcode-cn.com/problems/the-dining-philosophers/">https://leetcode-cn.com/problems/the-dining-philosophers/</a></p>
-</blockquote>
-<h2 id="4-读者-写者问题">4. 读者-写者问题</h2>
-<p>读者-写者问题常用于测试新同步原语，其问题描述如下：<br>
-多个进程共享一个数据对象，只要求读的进程称读者进程，有写或修改要求的进程称写者进程。读操作可由多个读者进程同时执行，而写操作具有排他性。</p>
-<h3 id="41-读者优先">4.1 读者优先</h3>
-<p>下图是读者-写者问题的读者优先解决方案也即一般化的解决方案<br>
-<img src="https://n1000g.github.io/post-images/1639600123226.png" alt="读者优先" loading="lazy"></p>
-<p>即第一个到来的读者进程和其他写者进程一同竞争数据对象的资源信号量，如果发现资源所有者为读者进程，新来的读者进程可以跳过申请，直接进行读操作。而实现这个过程又需要对读者进程进行计数：</p>
-<ul>
-<li>考虑到写者进程要与其他进程互斥执行，设置写互斥信号量 wmutex；</li>
-<li>读者进程之间可并发执行，设置计数变量 readercount 初始为 0；</li>
-<li>readercount 对于多个读者进程而言是临界资源，应为之设立互斥信号量 rmutex。</li>
-</ul>
-<pre><code class="language-c">int readercount = 0;
-semaphore rmutex = 1, wmutex = 1;
-/**
- * 写者进程——互斥访问
- */
-void writer() {
-    do {
-        P(wmutex);
-        写操作
-        V(wmutex);
-    } while(true);
-}
 
-/**
- * 读者进程——
- * 系统中只存在的当前唯一的读者进程 0 时，与写者进程竞争临界资源
- * 访问 readercount 并计数
- */
-void reader() {
-    do {
-        P(rmutex);
-        if (readercount == 0) P(wmutex);
-        readercount++;
-        V(rmutex);
-        读操作
-        P(rmutex);
-        readercount--;
-        if (readercount == 0) V(wmutex);
-        V(rmutex);
-    } while (true);
-}
-</code></pre>
-<p>主程序描述</p>
-<pre><code class="language-c">void main() {
-    cobegin
-        reader₁(); reader₂(); ...
-        writer₁(); writer₂(); ...
-    coend
-}
-</code></pre>
-<h3 id="42-公平型读者-写者问题即解决方案">4.2 公平型读者-写者问题即解决方案</h3>
-<p>上述解决方案对写者进程来说，一旦系统中有读者进程在进行读操作，就必须等待，直到 readercount 等于 0。要消除这个读者优先，实现新来进程无论是读者还是写者都阻塞于同一队列，公平竞争临界资源，即“公平型读者-写者问题”的解决方案如下：<br>
-<img src="https://n1000g.github.io/post-images/1639601542576.png" alt="公平型读者写者" loading="lazy"></p>
-<p>如图，设置一个互斥信号量 S，读者进程和写者进程都需要先竞争 S，再进行之前的操作，使得阻塞在 S 上的进程是什么属性都无所谓，实现公平竞争。</p>
-<pre><code class="language-c">int readercount = 0;
-semaphore rmutex = 1, wmutex = 1, S = 1;
-/**
- * 写者进程
- */
-void writer() {
-    do {
-        P(S);
-        P(wmutex)
-        V(S);
-        写操作
-        V(wmutex);
-    } while(true);
-}
+    <meta name="description" content="1. 进程与线程
+1.1 进程的定义与特征
+在多道程序环境下，允许多个程序并发执行，此时它们失去封闭性，并具有间断性及不可再现性的特征。为此映入了进程（Process）的概念，以便更好地描述和控制程序的并发执行，实现操作系统的并发性和共享性..." />
+    <meta name="keywords" content="Linux,操作系统" />
+  </head>
+  <body>
+    <div id="app" class="main">
 
-/**
- * 读者进程
- */
-void reader() {
-    do {
-        P(S);
-        P(rmutex);
-        if (readercount == 0) P(wmutex);
-        readercount++;
-        V(rmutex);
-        V(S);
-        读操作
-        P(rmutex);
-        readercount--;
-        if (readercount == 0) V(wmutex);
-        V(rmutex);
-    } while (true);
-}
-</code></pre>
-<h3 id="43-写者优先">4.3 写者优先</h3>
-<p>如题。<br>
-<img src="https://n1000g.github.io/post-images/1639601905558.png" alt="写者优先" loading="lazy"></p>
-<p>仅第一个到达的写者进程与读者进程一起去 S 处排队</p>
-<pre><code class="language-c">int readercount = 0, writercount = 0;
-semaphore rmutex = 1, wmutex = 1, S = 1, mutex = 1;
-/**
- * 写者进程——添加了与读者优先解决方案中与读者相似的逻辑
- */
-void writer() {
-    do {
-        P(mutex);
-        if (writercount == 0) P(S);
-        writercount ++;
-        V(mutex);
-
-        P(wmutex)
-        写操作
-        V(wmutex);
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://n1000g.github.io">
+        <img src="https://n1000g.github.io/images/avatar.png?v=1639699533986" class="site-logo">
+        <h1 class="site-title">n1000g</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
         
-        P(mutex);
-        writercount --;
-        if (writercount == 0) V(S);
-        V(mutex);
-    } while(true);
-}
+          <a href="https://n1000g.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://n1000g.github.io/extract" class="site-nav">
+            摘译
+          </a>
+        
+      
+        
+          <a href="about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      早日成长为一只老攻城狮
+    </div>
+    <div class="site-footer">
+      <li>© 2021 GitHub, Inc.</li> | <a class="rss" href="https://n1000g.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
 
-/**
- * 读者进程——同 4.3
- */
-void reader() {
-    do {
-        P(S);
-        P(rmutex);
-        if (readercount == 0) P(wmutex);
-        readercount++;
-        V(rmutex);
-        V(S);
-        读操作
-        P(rmutex);
-        readercount--;
-        if (readercount == 0) V(wmutex);
-        V(rmutex);
-    } while (true);
-}
-</code></pre>
-<h3 id="44-限定读者问题">4.4 限定读者问题</h3>
-<p>如题<br>
-可增设 rmax 信号量，使多出来的读者进程阻塞至此。</p>
-<pre><code class="language-c">int readercount = 0;
-semaphore rmutex = 1, wmutex = 1;
-/**
- * 写者进程——同 4.1
- */
-void writer() {
-    do {
-        P(wmutex);
-        写操作
-        V(wmutex);
-    } while(true);
-}
 
-/**
- * 读者进程——多余读者挂至 rmax 信号量阻塞队列
- */
-void reader() {
-    do {
-        P(rmax);
-
-        P(rmutex);
-        if (readercount == 0) P(wmutex);
-        readercount++;
-        V(rmutex);
-        读操作
-        P(rmutex);
-        readercount--;
-        if (readercount == 0) V(wmutex);
-        V(rmutex);
-
-        V(rmax);
-    } while (true);
-}
-</code></pre>
-<h2 id="5-其他经典-p-v-操作问题">5. 其他经典 P-V 操作问题</h2>
-<h3 id="51-独木桥-单行道问题">5.1 独木桥、单行道问题</h3>
-<p>如题，南北通车，单行道上只能走同一方向的车辆。使用记录型信号量模拟道路情况。<br>
-分析：两个方向的车辆基本性质完全相同，均类似读者-写者问题中写者进程。使每类第一个到达的进程与另一类进程竞争单行道这一临界资源。</p>
-<pre><code class="language-c">/**
- * 南边来的和北边来的车辆数量
- * 和临界资源——单行道
- */
-int southcount = 0, northcount = 0;
-semaphore road = 1;
-/**
- * 模拟由南向北的车辆
- */
-void S2N() {
-    do {
-        P(smutex);
-        if (southcount == 0) P(road);
-        southcount++;
-        V(smutex);
-        通过单行道
-        P(smutex);
-        southcount--;
-        if (southcount == 0) V(road);
-        V(smutex);
-    } while (true);
-}
-
-/**
- * 模拟由北向南的车辆
- */
-void N2S() {
-    do {
-        P(nmutex);
-        if (northcount == 0) P(road);
-        northcount++;
-        V(nmutex);
-        通过单行道
-        P(nmutex);
-        northcount--;
-        if (northcount == 0) V(road);
-        V(nmutex);
-    } while (true);
-}
-</code></pre>
-<h3 id="52-司机售票员同步问题">5.2 司机售票员同步问题</h3>
-<p>问题描述：汽车司机与售票员之间必须协同工作，一方面，只有售票员把车门关好了司机才能开车，因此，售票员关好车门应通知司机开车。另一方面，只有当司机已经停下，售票员才能开门上下客，故司机停车后应通知售票员。假定某辆公共汽车上有两名售票员与一名司机，汽车当前正在始发站停车上客，试设必要的信号灯及赋初值，写出他们的同步过程。</p>
-<p><strong>问题解答</strong></p>
-<blockquote>
-<p><a href="https://www.codeleading.com/article/32956105455/">https://www.codeleading.com/article/32956105455/</a></p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[【OS 基础课笔记】二、进程管理]]></title>
-        <id>https://n1000g.github.io/post/k2efUYuav/</id>
-        <link href="https://n1000g.github.io/post/k2efUYuav/">
-        </link>
-        <updated>2021-12-12T23:36:02.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="1-进程与线程">1. 进程与线程</h2>
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">【OS 基础课笔记】二、进程管理</h2>
+            <div class="post-date">2021-12-13</div>
+            
+              <div class="feature-container" style="background-image: url('https://n1000g.github.io/post-images/k2efUYuav.png')">
+              </div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="1-进程与线程">1. 进程与线程</h2>
 <h3 id="11-进程的定义与特征">1.1 进程的定义与特征</h3>
 <p>在多道程序环境下，允许多个程序并发执行，此时它们失去封闭性，并具有间断性及不可再现性的特征。为此映入了进程（Process）的概念，以便更好地描述和控制程序的并发执行，实现操作系统的并发性和共享性。</p>
 <p>为使并发的程序能独立运行，必须为止配置一个专门的数据结构，称为进程控制块（Process Control Block，PCB）。操作系统利用 PCB 描述一个进程的基本情况和运行状态，所谓创建进程就是创建一个 PCB。PCB、程序段和数据段三部分共同构成了<strong>进程实体</strong>，也即进程映像。进程是动态的，进程映像是静态的；</p>
@@ -872,200 +557,63 @@ and NPTL</a><br>
 <img src="https://n1000g.github.io/post-images/1639699328472.png" alt="银行家算法" loading="lazy"></p>
 <p>安全性检测算法描述：<br>
 <img src="https://n1000g.github.io/post-images/1639699353822.png" alt="安全性检查" loading="lazy"></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[JPA Criteria Queries]]></title>
-        <id>https://n1000g.github.io/post/hfZT72Yi5/</id>
-        <link href="https://n1000g.github.io/post/hfZT72Yi5/">
-        </link>
-        <updated>2021-07-26T05:08:58.000Z</updated>
-        <summary type="html"><![CDATA[<p>摘译自 <a href="https://www.baeldung.com/hibernate-criteria-queries#Criteria">baeldung</a><br>
-条件查询（Criteria Query）是 JPA 的一个重要特性。自 Hibernate 5.2 以后，Hibernate Criteria API 被官方声明为弃用方法，转而推荐使用 JPA Criteria API。本教程将围绕如何使用 Hibernate 和 JPA 来构建 Criteria Queries 展开讨论。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>摘译自 <a href="https://www.baeldung.com/hibernate-criteria-queries#Criteria">baeldung</a><br>
-条件查询（Criteria Query）是 JPA 的一个重要特性。自 Hibernate 5.2 以后，Hibernate Criteria API 被官方声明为弃用方法，转而推荐使用 JPA Criteria API。本教程将围绕如何使用 Hibernate 和 JPA 来构建 Criteria Queries 展开讨论。</p>
-<!-- more -->
-<h2 id="1-概述">1. 概述</h2>
-<p>在本教程中，我们将讨论一个非常有用的 JPA 特性——条件查询。</p>
-<p>它不仅使我们能够在不使用纯 SQL 的情况下编写查询，而且还为查询提供了一些面向对象的控制，这也即 Hibernate 的主要特性之一。Criteria API 允许我们以编程的方式构建一个应用不同的过滤规则和逻辑条件的 Criteria 查询对象。</p>
-<p>从Hibernate 5.2开始，Hibernate Criteria API 就被弃用了，新的开发集中在 JPA Criteria API 上。我们将探索如何使用 Hibernate 和 JPA 来构建 Criteria Queries。</p>
-<h2 id="2-maven-依赖">2. Maven 依赖</h2>
-<pre><code class="language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.hibernate&lt;/groupId&gt;
-    &lt;artifactId&gt;hibernate-core&lt;/artifactId&gt;   
-    &lt;version&gt;5.3.2.Final&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
-<h2 id="3-简单示例">3. 简单示例</h2>
-<p>我们以如何从数据库中获取特定类（Item）的所有实例为例：</p>
-<pre><code class="language-java">public class Item implements Serializable {
 
-    private Integer itemId;
-    private String itemName;
-    private String itemDescription;
-    private Integer itemPrice;
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://n1000g.github.io/tag/g6AsQXnCo/" class="tag">
+                    Linux
+                  </a>
+                
+                  <a href="https://n1000g.github.io/tag/SPkd31YUC/" class="tag">
+                    操作系统
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://n1000g.github.io/post/hfZT72Yi5/">
+                  <h3 class="post-title">
+                    JPA Criteria Queries
+                  </h3>
+                </a>
+              </div>
+            
 
-   // standard setters and getters
-}
-</code></pre>
-<p>它的 Criteria Query 如下：</p>
-<pre><code class="language-java">public List&lt;T&gt; getAll() {
-    Session session = HibernateUtil.getHibernateSession();
-    CriteriaBuilder cb = session.getCriteriaBuilder();
-    CriteriaQuery&lt;Item&gt; cr = cb.createQuery(Item.class);
-    Root&lt;Item&gt; root = cr.from(Item.class);
-    cr.select(root);
-    Query&lt;Item&gt; query = session.createQuery(cr);
-    return query.getResultList();
-}
-</code></pre>
-<p>上面的查询是如何获取所有项的简单演示。让我们一步一步来看看我们做了什么：</p>
-<ol>
-<li>从 SessionFactory 对象创建一个 Session 实例</li>
-<li>通过调用 getCriteriaBuilder() 方法创建一个 CriteriaBuilder 实例</li>
-<li>通过调用 CriteriaBuilder 的 createQuery()方法创建一个 CriteriaQuery 实例</li>
-<li>通过调用 Session 的 createQuery() 方法创建 Query 的实例</li>
-<li>调用查询对象的getResultList()方法，它将给出结果</li>
-</ol>
-<pre><code class="language-mermaid">graph LR;
-    SessionFactory --&gt; Session;
-    Session --&gt; CriteriaBuilder;
-    subgraph build criteriaQuery;
-    	CriteriaBuilder --Item.class--&gt; CriteriaQuery;
-    	Root --Item.class--&gt; CriteriaQuery;
-    end;
-    CriteriaQuery --&gt; Query;
-    Query --&gt; results;
-</code></pre>
-<p>现在我们已经介绍了基础知识，让我们继续了解条件查询的一些特性:</p>
-<h3 id="31-expressions">3.1 Expressions</h3>
-<p>CriteriaBuilder 可用于基于特定条件限制查询结果：</p>
-<h4 id="where-子句">Where 子句</h4>
-<pre><code class="language-java">// where itemPrice &gt; 1000
-cr.select(root).where(cb.gt(root.get(&quot;itemPrice&quot;), 1000));
-// where itemPrice &lt; 1000
-cr.select(root).where(cb.lt(root.get(&quot;itemPrice&quot;), 1000));
-// Items having itemName contain Chair
-cr.select(root).where(cb.like(root.get(&quot;itemName&quot;), &quot;%chair%&quot;));
-// To check if the given property is not null:
-cr.select(root).where(cb.isNotNull(root.get(&quot;itemDescription&quot;)));
-</code></pre>
-<h4 id="表达式链">表达式链</h4>
-<pre><code class="language-java">Predicate[] predicates = new Predicate[2];
-predicates[0] = cb.isNull(root.get(&quot;itemDescription&quot;));
-predicates[1] = cb.like(root.get(&quot;itemName&quot;), &quot;chair%&quot;);
-cr.select(root).where(predicates);
-// or
-cr.select(root).where(cb.or(predicates[0], predicates[1]));
-// and
-cr.select(root).where(cb.and(predicates[0], predicates[1]));
-</code></pre>
-<h3 id="32-sorting">3.2 Sorting</h3>
-<pre><code class="language-java">cr.orderBy(
-  cb.asc(root.get(&quot;itemName&quot;)), 
-  cb.desc(root.get(&quot;itemPrice&quot;)));
-</code></pre>
-<h3 id="33-projections-aggregates-and-grouping-functions">3.3 Projections, Aggregates, and Grouping Functions</h3>
-<pre><code class="language-java">cr.select(cb.count(root));
-cr.select(cb.avg(root.get(&quot;itemPrice&quot;)));
-</code></pre>
-<h3 id="34-criteriaupdate">3.4 CriteriaUpdate</h3>
-<p>CriteriaUpdate 有一个 set() 方法，可以用来为数据库记录提供新值:</p>
-<pre><code class="language-java">CriteriaUpdate&lt;Item&gt; criteriaUpdate = cb.createCriteriaUpdate(Item.class);Root&lt;Item&gt; root = criteriaUpdate.from(Item.class);criteriaUpdate.set(&quot;itemPrice&quot;, newPrice);criteriaUpdate.where(cb.equal(root.get(&quot;itemPrice&quot;), oldPrice));Transaction transaction = session.beginTransaction();session.createQuery(criteriaUpdate).executeUpdate();transaction.commit();
-</code></pre>
-<h3 id="35-criteriadelete">3.5 CriteriaDelete</h3>
-<pre><code class="language-java">CriteriaDelete&lt;Item&gt; criteriaDelete = cb.createCriteriaDelete(Item.class);Root&lt;Item&gt; root = criteriaDelete.from(Item.class);criteriaDelete.where(cb.greaterThan(root.get(&quot;itemPrice&quot;), targetPrice));Transaction transaction = session.beginTransaction();session.createQuery(criteriaDelete).executeUpdate();transaction.commit();
-</code></pre>
-<h2 id="相对-hql-的优势">相对 HQL 的优势</h2>
-<ul>
-<li><strong>Object Oriented</strong></li>
-<li>flexible</li>
-<li>type-safety</li>
-</ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[python 数据处理脚本的通用设计]]></title>
-        <id>https://n1000g.github.io/post/zIn7XAv_S/</id>
-        <link href="https://n1000g.github.io/post/zIn7XAv_S/">
-        </link>
-        <updated>2021-07-20T12:08:05.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="常用库">常用库</h2>
-<h3 id="pymysql"><a href="https://pymysql.readthedocs.io/en/latest/">PyMySQL</a></h3>
-<pre><code class="language-python">import pymysql
-# 连接
-connection = pymysql.connect(host, user, password, db, port, charset, 
-cursorclass=pymysql.cursors.DictCursor)
-cursor = connection.cursor()
-# 处理
-cursor.execute(sql)
-res = cursor.fetchall()  # 查询语句需要 fetch 后 才能执行下一次查询
-# connection.commit()  # 修改语句需要 commit  后 才能执行下一次查询
-# 关闭
-cursor.close()
-connection.close()
-</code></pre>
-<h3 id="openpyxl"><a href="https://openpyxl.readthedocs.io/en/stable/">openpyxl</a></h3>
-<p><strong>写</strong></p>
-<pre><code class="language-python">from openpyxl import Workbook
+            
 
-workbook = Workbook()
-sheet = workbook.active
-sheet['A1'] = 42
-sheet.append([1, 2, 3])
-sheet['A2'] = datetime.datetime.now()
-workbook.save(&quot;sample.xlsx&quot;)
-</code></pre>
-<p><strong>读</strong></p>
-<pre><code class="language-python">from openpyxl import load_workbook
+          </div>
 
-workbook = load_workbook(&quot;excelfile.xlsx&quot;)
-sheets = workbook.sheetnames
-sheet = workbook[sheets[0]]  # sheet = workbook.active
+        </div>
+      </div>
+    </div>
 
-for row in sheet.rows:
-    val = row[0].value
-    print(val)
-</code></pre>
-<h2 id="几个较常用的-sql-写法">几个较常用的 SQL 写法</h2>
-<p>编写代码相对十分耗时且极易出错，复杂度不太高的任务可以用数据库客户端直接解决，总结下一些如按字段讨论、列连接成行的 SQL 写法</p>
-<h3 id="按字段讨论">按字段讨论</h3>
-<p>之前业务升级某些数据前端不再展示，运营要统计某机构下学生离校时间，但这个时间在一张表不同字段表示，正常结课的课程用 <code>closed_time</code>，学生删除的用 <code>dropped_time</code>，班级删除的用 <code>delete_time</code>，</p>
-<pre><code class="language-sql">SELECT id AS '学生id', create_time AS '入校时间',(
-	CASE `status` 
-	WHEN 40 OR 24 THEN dropped_time
-	WHEN -1 THEN closed_time 
-	WHEN 16 THEN dropped_time
-	END
-) AS '离校时间'
-FROM class_student WHERE org_id={0}
-</code></pre>
-<h3 id="多列数据连接成行展示">多列数据连接成行展示</h3>
-<p>如下是统计某一机构下每个班级的学生，要求按班级分类</p>
-<pre><code class="language-sql">SELECT org_id, class_id, GROUP_CONCAT(student_id ORDER BY student_id)
-FROM (
-	SELECT *
-	FROM class_student
-	WHERE org_id=2619
-) t
-GROUP BY class_id
-</code></pre>
-<h2 id="按路径获取文件">按路径获取文件</h2>
-<p>由于系统路径分隔符不一致 Windows 下使用正斜杠分割路径如 <code>C:\Users\n8g\Desktop</code>，Linux 下则使用反斜杠分割路径如 <code>~/Documents</code>，于是在涉及读写本地文件需求相关的操作时，就要考虑代码的通用性，一个较不成熟的解决方案是用 python 标准库 os 做路径拼接处理</p>
-<pre><code class="language-python">FILE_FOLDER = os.getcwd()  # 当前工作路径
-FILE_NAME = &quot;file_to_process.abc&quot;  # 待处理文件
-fo = open(os.path.join(FILE_FOLDER, FILE_NAME), 'r')
-...
-</code></pre>
-<p>多文件</p>
-<pre><code class="language-python">file_name_list = os.listdir(FILE_FOLDER)
-for fname in file_name_list:
-    file_abs_path = os.path.join(FILE_FOLDER, f_name)
-    fo = open(file_abs_path)
-    ...
-...
-</code></pre>
-]]></content>
-    </entry>
-</feed>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+  <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+
+
+
+
+
+  </body>
+</html>
