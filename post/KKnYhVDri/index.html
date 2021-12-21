@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://n1000g.github.io/favicon.ico?v=1639700105291">
+<link rel="shortcut icon" href="https://n1000g.github.io/favicon.ico?v=1640065544647">
 <link rel="stylesheet" href="https://n1000g.github.io/styles/main.css">
 
 
@@ -18,10 +18,10 @@
 
 
 
-    <meta name="description" content="信号量（Semaphore）机制由圣 Dijkstra 于1956 年提出，是一种卓有成效的进程同步工具，现已被广泛运用在各类单处理机、多处理机和网络系统中。其中的记录型信号量机制今已成为考研操作系统重要考点。
+    <meta name="description" content="信号量（Semaphore）机制由圣 Dijkstra 于1956 年提出，是一种卓有成效的进程同步工具，现已被广泛运用在各类单处理机、多处理机和网络系统中。
 
 1. 记录型信号量机制
-除..." />
+除了初始化操作外，信号量只能通过两个原子操作 wait..." />
     <meta name="keywords" content="" />
   </head>
   <body>
@@ -31,7 +31,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://n1000g.github.io">
-        <img src="https://n1000g.github.io/images/avatar.png?v=1639700105291" class="site-logo">
+        <img src="https://n1000g.github.io/images/avatar.png?v=1640065544647" class="site-logo">
         <h1 class="site-title">n1000g</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -106,7 +106,7 @@
               </div>
             
             <div class="post-content" v-pre>
-              <p>信号量（Semaphore）机制由圣 Dijkstra 于1956 年提出，是一种卓有成效的进程同步工具，现已被广泛运用在各类单处理机、多处理机和网络系统中。其中的记录型信号量机制今已成为考研操作系统重要考点。</p>
+              <p>信号量（Semaphore）机制由圣 Dijkstra 于1956 年提出，是一种卓有成效的进程同步工具，现已被广泛运用在各类单处理机、多处理机和网络系统中。</p>
 <!-- more -->
 <h2 id="1-记录型信号量机制">1. 记录型信号量机制</h2>
 <p>除了初始化操作外，信号量只能通过两个原子操作 <code>wait()</code> 和 <code>signal()</code>，也称 P 操作和 V 操作。其中记录型信号量定义为 ① 一个整型的 <code>S-&gt;value</code> 表示资源数目（大于 0）或阻塞队列的长度（小于 0）；② 进程列表 <code>S-&gt;list</code> 表示阻塞在该信号量上的进程队列。<br>
