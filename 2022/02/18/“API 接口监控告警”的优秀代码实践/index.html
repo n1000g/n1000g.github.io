@@ -23,17 +23,17 @@
 <meta property="og:site_name" content="N1000g&#39;s Blog">
 <meta property="og:description" content="需求分析 面向对象分析（OOA）、面向对象设计（OOD）、面向对象编程（OOP），是面向对象开 发的三个主要环节。在前面的章节中，我对三者的讲解比较偏理论、偏概括性，目的是让你 先有一个宏观的了解，知道什么是 OOA、OOD、OOP。不过，光知道“是什么”是不够的，我们更重要的还是要知道“如何做”，也就是，如何进行面向对象分析、设计与编程。 在过往的工作中，我发现，很多工程师，特别是初级工程师，">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="c:%5CUsers%5Cn8g%5CPictures%5CTypora%5C%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B401.jpg">
-<meta property="og:image" content="c:%5CUsers%5Cn8g%5CPictures%5CTypora%5C%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B402.jpg">
-<meta property="og:image" content="c:%5CUsers%5Cn8g%5CPictures%5CTypora%5C%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B403.jpg">
-<meta property="og:image" content="c:%5CUsers%5Cn8g%5CPictures%5CTypora%5C%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B404.jpg">
-<meta property="og:image" content="c:%5CUsers%5Cn8g%5CPictures%5CTypora%5C%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B405.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/02/19/Q5ge8hEBaJ71ufU.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/02/19/7PoyMaxXNDwHtei.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/02/19/mJYw1sFVx2SduvI.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/02/19/cWE2TKns3FH7jIk.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/02/19/fwY8mZIgAzebJlX.jpg">
 <meta property="article:published_time" content="2022-02-18T15:26:11.000Z">
-<meta property="article:modified_time" content="2022-02-18T15:32:40.703Z">
+<meta property="article:modified_time" content="2022-02-19T09:51:47.462Z">
 <meta property="article:author" content="n1000g">
 <meta property="article:tag" content="设计模式">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="c:%5CUsers%5Cn8g%5CPictures%5CTypora%5C%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B401.jpg">
+<meta name="twitter:image" content="https://s2.loli.net/2022/02/19/Q5ge8hEBaJ71ufU.jpg">
   
   
   <title>“API 接口监控告警”的优秀代码实践 - N1000g&#39;s Blog</title>
@@ -265,12 +265,12 @@
 <h4 id="2-第二轮分析优化"><a class="markdownIt-Anchor" href="#2-第二轮分析优化"></a> 2. 第二轮分析优化</h4>
 <p>不过，这样的验证方式，每次都要明文传输密码。密码很容易被截获，是不安全的。那如果我们借助加密算法（比如 SHA），对密码进行加密之后，再传递到微服务端验证，是不是就可以了呢？实际上，这样也是不安全的，因为加密之后的密码及 AppID，照样可以被未认证系统（或者说黑客）截获，未认证系统可以携带这个加密之后的密码以及对应的 AppID，伪装成已认证系统来访问我们的接口。这就是典型的“重放攻击”。</p>
 <p>提出问题，然后再解决问题，是一个非常好的迭代优化方法。对于刚刚这个问题，我们可以借助 OAuth 的验证思路来解决。调用方将请求接口的 URL 跟 AppID、密码拼接在一起，然后进行加密，生成一个 token。调用方在进行接口请求的的时候，将这个 token 及 AppID，随 URL 一块传递给微服务端。微服务端接收到这些数据之后，根据 AppID 从数据库中取出对应的密码，并通过同样的 token 生成算法，生成另外一个 token。用这个新生成的 token 跟调用方传递过来的 token 对比。如果一致，则允许接口调用请求；否则， 就拒绝接口调用请求。</p>
-<p><img src="C:%5CUsers%5Cn8g%5CPictures%5CTypora%5C%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B401.jpg" srcset="/img/loading.gif" lazyload alt="" /></p>
+<p><img src="https://s2.loli.net/2022/02/19/Q5ge8hEBaJ71ufU.jpg" srcset="/img/loading.gif" lazyload alt="" /></p>
 <h4 id="3-第三轮分析优化"><a class="markdownIt-Anchor" href="#3-第三轮分析优化"></a> 3. 第三轮分析优化</h4>
 <p>不过，这样的设计仍然存在重放攻击的风险，还是不够安全。每个 URL 拼接上 AppID、密码生成的 token 都是固定的。未认证系统截获 URL、token 和 AppID 之后，还是可以通过重放攻击的方式，伪装成认证系统，调用这个 URL 对应的接口。</p>
 <p>为了解决这个问题，我们可以进一步优化 token 生成算法，引入一个随机变量，让每次接口请求生成的 token 都不一样。我们可以选择时间戳作为随机变量。原来的 token 是对 URL、AppID、密码三者进行加密生成的，现在我们将 URL、AppID、密码、时间戳四者进行加密来生成 token。调用方在进行接口请求的时候，将 token、AppID、时间戳，随 URL 一并传递给微服务端。</p>
 <p>微服务端在收到这些数据之后，会验证当前时间戳跟传递过来的时间戳，是否在一定的时间窗口内（比如一分钟）。如果超过一分钟，则判定 token 过期，拒绝接口请求。如果没有超过一分钟，则说明 token 没有过期，就再通过同样的 token 生成算法，在服务端生成新的 token，与调用方传递过来的 token 比对，看是否一致。如果一致，则允许接口调用请求；否则，就拒绝接口调用请求。</p>
-<p><img src="C:%5CUsers%5Cn8g%5CPictures%5CTypora%5C%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B402.jpg" srcset="/img/loading.gif" lazyload alt="" /></p>
+<p><img src="https://s2.loli.net/2022/02/19/7PoyMaxXNDwHtei.jpg" srcset="/img/loading.gif" lazyload alt="" /></p>
 <h4 id="4-第四轮分析优化"><a class="markdownIt-Anchor" href="#4-第四轮分析优化"></a> 4. 第四轮分析优化</h4>
 <p>不过，你可能会说，这样还是不够安全啊。未认证系统还是可以在这一分钟的 token 失效窗口内，通过截获请求、重放请求，来调用我们的接口啊！</p>
 <p>你说得没错。不过，攻与防之间，本来就没有绝对的安全。我们能做的就是，尽量提高攻击的成本。这个方案虽然还有漏洞，但是实现起来足够简单，而且不会过度影响接口本身的性能（比如响应时间）。所以，权衡安全性、开发成本、对系统性能的影响，这个方案算是比较折中、比较合理的了。</p>
@@ -329,7 +329,7 @@
 </ul>
 <p>对于方法的识别，很多面向对象相关的书籍，一般都是这么讲的，识别出需求描述中的动词，作为候选的方法，再进一步过滤筛选。类比一下方法的识别，我们可以把功能点中涉及的名词，作为候选属性，然后同样进行过滤筛选。</p>
 <p>我们可以借用这个思路，根据功能点描述，识别出来 AuthToken 类的属性和方法，如下所示：</p>
-<p><img src="C:%5CUsers%5Cn8g%5CPictures%5CTypora%5C%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B403.jpg" srcset="/img/loading.gif" lazyload alt="" /></p>
+<p><img src="https://s2.loli.net/2022/02/19/mJYw1sFVx2SduvI.jpg" srcset="/img/loading.gif" lazyload alt="" /></p>
 <p>从上面的类图中，我们可以发现这样三个小细节：</p>
 <ul>
 <li>并不是所有出现的名词都被定义为类的属性，比如 URL、AppID、密码、 时间戳这几个名词，我们把它作为了方法的参数。</li>
@@ -345,14 +345,14 @@
 <li>解析 URL，得到 token、AppID、时间戳等信息。</li>
 </ul>
 <p>虽然需求描述中，我们都是以 URL 来代指接口请求，但是，接口请求并不一定是以 URL 的形式来表达，还有可能是 dubbo RPC 等其他形式。为了让这个类更加通用，命名更加贴切，我们接下来把它命名为 ApiRequest。下面是我根据功能点描述设计的 ApiRequest 类。</p>
-<p><img src="C:%5CUsers%5Cn8g%5CPictures%5CTypora%5C%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B404.jpg" srcset="/img/loading.gif" lazyload alt="" /></p>
+<p><img src="https://s2.loli.net/2022/02/19/cWE2TKns3FH7jIk.jpg" srcset="/img/loading.gif" lazyload alt="" /></p>
 <h4 id="credentialstorage-类"><a class="markdownIt-Anchor" href="#credentialstorage-类"></a> CredentialStorage 类</h4>
 <p>CredentialStorage 类相关的功能点有一个：</p>
 <ul>
 <li>从存储中取出 AppID 和对应的密码</li>
 </ul>
 <p>CredentialStorage 类非常简单，类图如下所示。为了做到抽象封装具体的存储方式，我们将 CredentialStorage 设计成了接口，基于接口而非具体的实现编程。</p>
-<p><img src="C:%5CUsers%5Cn8g%5CPictures%5CTypora%5C%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B405.jpg" srcset="/img/loading.gif" lazyload alt="" /></p>
+<p><img src="https://s2.loli.net/2022/02/19/fwY8mZIgAzebJlX.jpg" srcset="/img/loading.gif" lazyload alt="" /></p>
 <h3 id="3-定义类与类之间的交互关系"><a class="markdownIt-Anchor" href="#3-定义类与类之间的交互关系"></a> 3. 定义类与类之间的交互关系</h3>
 <p>类与类之间都哪些交互关系呢？UML 统一建模语言中定义了六种类之间的关系。它们分别是：泛化、实现、关联、聚合、组合、依赖。关系比较多，而且有些还比较相近，比如聚合和组合，接下来我就逐一讲解一下。</p>
 <h4 id="泛化generalization"><a class="markdownIt-Anchor" href="#泛化generalization"></a> 泛化（Generalization）</h4>
@@ -379,7 +379,7 @@
 <h3 id="4-将类组装起来并提供执行入口"><a class="markdownIt-Anchor" href="#4-将类组装起来并提供执行入口"></a> 4. 将类组装起来并提供执行入口</h3>
 <p>类定义好了，类之间必要的交互关系也设计好了，接下来我们要将所有的类组装在一起，提供一个执行入口。这个入口可能是一个 main() 函数，也可能是一组给外部用的 API 接口。通过这个入口，我们能触发整个代码跑起来。</p>
 <p>接口鉴权并不是一个独立运行的系统，而是一个集成在系统上运行的组件，所以，我们封装所有的实现细节，设计了一个最顶层的 ApiAuthencator 接口类，暴露一组给外部调用者使用的 API 接口，作为触发执行鉴权逻辑的入口。具体的类的设计如下所示：</p>
-<h2 id="编程"><a class="markdownIt-Anchor" href="#编程"></a> 编程</h2>
+<h2 id="实现"><a class="markdownIt-Anchor" href="#实现"></a> 实现</h2>
 <p>面向对象设计完成之后，我们已经定义清晰了类、属性、方法、类之间的交互，并且将所有的类组装起来，提供了统一的执行入口。接下来，面向对象编程的工作，就是将这些设计思路翻译成代码实现。有了前面的类图，这部分工作相对来说就比较简单了。所以，这里我只给出比较复杂的 ApiAuthencator 的实现。</p>
 <p>对于 AuthToken、ApiRequest、CredentialStorage 这三个类，在这里我就不给出具体的代码实现了。给你留一个课后作业，你可以试着把整个鉴权框架自己去实现一遍。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">ApiAuthencator</span> </span>&#123;<br>    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">auth</span><span class="hljs-params">(String url)</span></span>;<br>    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">auth</span><span class="hljs-params">(ApiRequest apiRequest)</span></span>;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DefaultApiAuthencatorImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">ApiAuthencator</span> </span>&#123;<br>    <span class="hljs-keyword">private</span> CredentialStorage credentialStorage;<br>    <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ApiAuthencator</span><span class="hljs-params">()</span> </span>&#123;<br>    	<span class="hljs-keyword">this</span>.credentialStorage = <span class="hljs-keyword">new</span> MysqlCredentialStorage();<br>    &#125;<br>    <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">ApiAuthencator</span><span class="hljs-params">(CredentialStorage credentialStorage)</span> </span>&#123;<br>    	<span class="hljs-keyword">this</span>.credentialStorage = credentialStorage;<br>    &#125;<br>    <br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">auth</span><span class="hljs-params">(String url)</span> </span>&#123;<br>        ApiRequest apiRequest = ApiRequest.buildFromUrl(url);<br>        auth(apiRequest);<br>    &#125;<br>    <br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">auth</span><span class="hljs-params">(ApiRequest apiRequest)</span> </span>&#123;<br>        String appId = apiRequest.getAppId();<br>        String token = apiRequest.getToken();<br>        <span class="hljs-keyword">long</span> timestamp = apiRequest.getTimestamp();<br>        String originalUrl = apiRequest.getOriginalUrl();<br>        <br>        AuthToken clientAuthToken = <span class="hljs-keyword">new</span> AuthToken(token, timestamp);<br>        <span class="hljs-keyword">if</span> (clientAuthToken.isExpired()) &#123;<br>        	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">&quot;Token is expired.&quot;</span>);<br>        &#125;<br>        <br>        String password = credentialStorage.getPasswordByAppId(appId);<br>        AuthToken serverAuthToken = AuthToken.generate(originalUrl, appId, <span class="hljs-function">password</span><br><span class="hljs-function">        <span class="hljs-title">if</span> <span class="hljs-params">(!serverAuthToken.match(clientAuthToken)</span>) </span>&#123;<br>        	<span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> RuntimeException(<span class="hljs-string">&quot;Token verfication failed.&quot;</span>);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
