@@ -1,0 +1,524 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="n1000g">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="信号量（Semaphore）机制由圣 Dijkstra 于1956 年提出，是一种卓有成效的进程同步工具，现已被广泛运用在各类单处理机、多处理机和网络系统中。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【OS 基础课笔记】经典进程同步问题的记录型信号量机制解决方案">
+<meta property="og:url" content="http://n1000g.github.io/2021/12/16/KKnYhVDri/index.html">
+<meta property="og:site_name" content="N1000g&#39;s Blog">
+<meta property="og:description" content="信号量（Semaphore）机制由圣 Dijkstra 于1956 年提出，是一种卓有成效的进程同步工具，现已被广泛运用在各类单处理机、多处理机和网络系统中。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://n1000g.github.io/post-images/1639600123226.png">
+<meta property="og:image" content="https://n1000g.github.io/post-images/1639601542576.png">
+<meta property="og:image" content="https://n1000g.github.io/post-images/1639601905558.png">
+<meta property="article:published_time" content="2021-12-15T16:39:19.000Z">
+<meta property="article:modified_time" content="2021-12-18T00:05:33.685Z">
+<meta property="article:author" content="n1000g">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://n1000g.github.io/post-images/1639600123226.png">
+  
+  
+  <title>【OS 基础课笔记】经典进程同步问题的记录型信号量机制解决方案 - N1000g&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"n1000g.github.io","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="【OS 基础课笔记】经典进程同步问题的记录型信号量机制解决方案">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2021-12-16 00:39" pubdate>
+        2021年12月16日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      6.7k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      56 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">【OS 基础课笔记】经典进程同步问题的记录型信号量机制解决方案</h1>
+            
+            <div class="markdown-body">
+              <p>信号量（Semaphore）机制由圣 Dijkstra 于1956 年提出，是一种卓有成效的进程同步工具，现已被广泛运用在各类单处理机、多处理机和网络系统中。</p>
+<span id="more"></span>
+<h2 id="1-记录型信号量机制"><a class="markdownIt-Anchor" href="#1-记录型信号量机制"></a> 1. 记录型信号量机制</h2>
+<p>除了初始化操作外，信号量只能通过两个原子操作 <code>wait()</code> 和 <code>signal()</code>，也称 P 操作和 V 操作。其中记录型信号量定义为 ① 一个整型的 <code>S-&gt;value</code> 表示资源数目（大于 0）或阻塞队列的长度（小于 0）；② 进程列表 <code>S-&gt;list</code> 表示阻塞在该信号量上的进程队列。<br />
+当 <code>S-&gt;value</code> 定义为 1 时，记录型信号量转化为互斥信号量表示一个用于互斥访问的临界资源。</p>
+<p>记录型信号量的数据结构和 P、V 操作描述如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><div class="code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></div></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 记录型信号量的进程阻塞队列</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">process_control_block</span> &#123;</span><br>    <span class="hljs-keyword">int</span> pid; <span class="hljs-comment">// 进程标识符</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">process_control_block</span> * <span class="hljs-title">next</span>;</span> <span class="hljs-comment">// 队列指针</span><br>&#125; process_control_block;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * semaphore 记录型信号量</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> &#123;</span><br>    <span class="hljs-keyword">int</span> value; <span class="hljs-comment">// 资源数量</span><br>    process_control_block * <span class="hljs-built_in">list</span>; <span class="hljs-comment">// 阻塞队列头</span><br>&#125; semaphore;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">wait</span><span class="hljs-params">(semaphore * S)</span> </span>&#123;<br>    S-&gt;value --;<br>    <span class="hljs-keyword">if</span> (S-&gt;value &lt; <span class="hljs-number">0</span>) block(S-&gt;<span class="hljs-built_in">list</span>);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">signal</span><span class="hljs-params">(semaphore * S)</span> </span>&#123;<br>    S-&gt;value ++;<br>    <span class="hljs-keyword">if</span> (S-&gt;value &lt;= <span class="hljs-number">0</span>) wakeup(S-&gt;<span class="hljs-built_in">list</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>其中 block() 和 wakeup() 是操作系统原语，分别用于 阻塞 和 唤醒 进程。</p>
+<h2 id="2-生产者-消费者问题"><a class="markdownIt-Anchor" href="#2-生产者-消费者问题"></a> 2. 生产者-消费者问题</h2>
+<blockquote>
+<p>生产者消费者问题（英语：Producer-consumer problem），也称有限缓冲问题（Bounded-buffer problem），是一个多进程同步问题的经典案例。该问题描述了共享固定大小缓冲区的两个进程——即所谓的“生产者”和“消费者”——在实际运行时会发生的问题。生产者的主要作用是生成一定量的数据放到缓冲区中，然后重复此过程。与此同时，消费者也在缓冲区消耗这些数据。该问题的关键就是要保证生产者不会在缓冲区满时加入数据，消费者也不会在缓冲区中空时消耗数据。</p>
+</blockquote>
+<h3 id="21-基于循环缓冲的解决方案"><a class="markdownIt-Anchor" href="#21-基于循环缓冲的解决方案"></a> 2.1 基于循环缓冲的解决方案</h3>
+<p>假定缓冲池中有 n 个缓冲区并用循环结构组织，可以利用互斥信号量 mutex 实现各进程对缓冲池的互斥使用，用信号量 empty 和 full 分别表示缓冲池中空缓冲和满缓冲资源的数目。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">int</span> in = <span class="hljs-number">0</span>, out = <span class="hljs-number">0</span>;<br>item buffer[n];<br>semaphore mutex = <span class="hljs-number">1</span>, full = <span class="hljs-number">0</span>, empty = n;<br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 生产者进程——</span><br><span class="hljs-comment"> * 申请空缓冲并生产数据项，如果无空缓冲区资源则自我阻塞直到被空缓冲区资源唤醒</span><br><span class="hljs-comment"> * 需注意缓冲池资源的互斥访问</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">producer</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        item nextp = produce_an_item();<br>        P(empty);<br>        P(mutex);<br>        buffer[in] = nextp;<br>        in = (in+<span class="hljs-number">1</span>) % n;<br>        V(mutex);<br>        V(full);<br>    &#125; <span class="hljs-keyword">while</span>(<span class="hljs-literal">true</span>);<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 消费者进程——</span><br><span class="hljs-comment"> * 申请满缓冲区并消费数据项，如果无满缓冲区资源则自我阻塞直到被满缓冲区资源唤醒</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">consumer</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(full);<br>        P(mutex);<br>        item nextc = buffer[out];<br>        out = (out+<span class="hljs-number">1</span>) % n;<br>        V(mutex);<br>        V(empty);<br>        consume_the_item(nextc);<br>    &#125; <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>主程序描述</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-function">cobegin</span><br><span class="hljs-function">        <span class="hljs-title">producer</span><span class="hljs-params">()</span></span>; consumer();<br>    coend<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="22-基于单缓冲的但生产者-单消费者类同步问题"><a class="markdownIt-Anchor" href="#22-基于单缓冲的但生产者-单消费者类同步问题"></a> 2.2 基于单缓冲的但生产者-单消费者类同步问题</h3>
+<p>在测控系统中，数据采集任务将数据送入一单缓冲区，计算任务对该但缓冲区中数据取出并做计算处理。在这类问题中，信号量 full 和 empty 已经可以表示单缓冲资源的互斥属性了，相对 2.1 的代码描述，可以不再定义互斥信号量 mutex。</p>
+<h2 id="3-哲学家进餐问题"><a class="markdownIt-Anchor" href="#3-哲学家进餐问题"></a> 3. 哲学家进餐问题</h2>
+<p>由圣 Dijkstra 于1971 年提出并解决的用来演示在并发计算中多线程同步时产生的问题，旨在说明避免死锁和资源耗尽等问题。它的具体描述如下：</p>
+<blockquote>
+<p>有五个哲学家，他们的生活方式是交替地进行思考和进餐，哲学家们共用一张圆桌，分别坐在周围的五张椅子上，在圆桌上有五个碗和五支筷子，平时哲学家进行思考，饥饿时便试图取其左、右最靠近他的筷子，只有在他拿到两支筷子时才能进餐，该哲学家进餐完毕后，放下左右两只筷子又继续思考。</p>
+</blockquote>
+<h3 id="31-信号量定义和哲学家活动描述"><a class="markdownIt-Anchor" href="#31-信号量定义和哲学家活动描述"></a> 3.1 信号量定义和哲学家活动描述</h3>
+<p>筷子作为临界资源，一段时间仅允许一位哲学家使用，为了实现对筷子的互斥使用，可以为每根筷子设置一个互斥信号量，于是第 i 位 哲学家的活动可描述为</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 临界资源筷子</span><br><span class="hljs-comment"> */</span><br>semaphore chopstick[<span class="hljs-number">5</span>] = &#123;<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>&#125;; <br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 第 i 位哲学家</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">philosopher_i</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(chopstick[i]);<br>        P(chopstick[(i+<span class="hljs-number">1</span>) % <span class="hljs-number">5</span>]);<br>        <span class="hljs-comment">// eat</span><br>        V(chopstick[i]);<br>        V(chopstick[(i+<span class="hljs-number">1</span>) % <span class="hljs-number">5</span>]);<br>        <span class="hljs-comment">// think</span><br>    &#125; <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="32-存在问题分析和进一步解决方案"><a class="markdownIt-Anchor" href="#32-存在问题分析和进一步解决方案"></a> 3.2 存在问题分析和进一步解决方案</h3>
+<p>上述方案中，每个哲学家先拿起左边筷子再拿起右边筷子，不会出现相邻的两个哲学家竞争同一根筷子的情况，但可能出现每个哲学家同时饥饿并拿起自己左边的筷子，引起死锁。</p>
+<p>为了避免死锁，有如下三种解决方案：</p>
+<ol>
+<li>双筷同举——当且仅当拿起两根筷子才允许进餐</li>
+<li>奇偶有别——1、3、5 号哲学家先左后右，2、4 号哲学家先右后左</li>
+<li>进餐限制——最多允许 4 根筷子被同时申请</li>
+</ol>
+<p>代码描述分别如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 1. 双筷齐举</span><br><span class="hljs-comment"> * 设置一个互斥信号量，同一时间只允许一个进程做申请资源 wait 操作</span><br><span class="hljs-comment"> * 可以解决死锁问题，但是显然进程并发性变差</span><br><span class="hljs-comment"> */</span><br>semaphore mutex = <span class="hljs-number">1</span>;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">philosopher_i</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(mutex);<br>        P(chopstick[i]);<br>        P(chopstick[(i+<span class="hljs-number">1</span>) % <span class="hljs-number">5</span>]);<br>        V(mutex);<br>        <span class="hljs-comment">// eat</span><br>        V(chopstick[i]);<br>        V(chopstick[(i+<span class="hljs-number">1</span>) % <span class="hljs-number">5</span>]);<br>        <span class="hljs-comment">// think</span><br>    &#125; <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 2. 奇偶有别</span><br><span class="hljs-comment"> * 1、3、5 号哲学家先申请 i 号筷子后申请 (i+1) % 5 号筷子</span><br><span class="hljs-comment"> * 2、4 号哲学家先申请  (i+1) % 5 号筷子后申请 i 号 筷子</span><br><span class="hljs-comment"> * 经分析，解决了死锁问题</span><br><span class="hljs-comment"> */</span><br><span class="hljs-comment">// 实现略</span><br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 3. 进餐限数</span><br><span class="hljs-comment"> * 设置一个初始化值为 4 资源信号量表示申请资源的权力</span><br><span class="hljs-comment"> * 最多只允许 4 个哲学家在申请筷子资源</span><br><span class="hljs-comment"> * 可以解决死锁问题，而进程并发性也未变差</span><br><span class="hljs-comment"> */</span><br>semaphore limit = <span class="hljs-number">4</span>;<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">philosopher_i</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(limit);<br>        P(chopstick[i]);<br>        P(chopstick[(i+<span class="hljs-number">1</span>) % <span class="hljs-number">5</span>]);<br>        V(limit);<br>        <span class="hljs-comment">// eat</span><br>        V(chopstick[i]);<br>        V(chopstick[(i+<span class="hljs-number">1</span>) % <span class="hljs-number">5</span>]);<br>        <span class="hljs-comment">// think</span><br>    &#125; <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="33-其他资料"><a class="markdownIt-Anchor" href="#33-其他资料"></a> 3.3 其他资料</h3>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/the-dining-philosophers/">https://leetcode-cn.com/problems/the-dining-philosophers/</a></p>
+</blockquote>
+<h2 id="4-读者-写者问题"><a class="markdownIt-Anchor" href="#4-读者-写者问题"></a> 4. 读者-写者问题</h2>
+<p>读者-写者问题常用于测试新同步原语，其问题描述如下：<br />
+多个进程共享一个数据对象，只要求读的进程称读者进程，有写或修改要求的进程称写者进程。读操作可由多个读者进程同时执行，而写操作具有排他性。</p>
+<h3 id="41-读者优先"><a class="markdownIt-Anchor" href="#41-读者优先"></a> 4.1 读者优先</h3>
+<p>下图是读者-写者问题的读者优先解决方案也即一般化的解决方案<br />
+<img src="https://n1000g.github.io/post-images/1639600123226.png" srcset="/img/loading.gif" lazyload alt="读者优先" /></p>
+<p>即第一个到来的读者进程和其他写者进程一同竞争数据对象的资源信号量，如果发现资源所有者为读者进程，新来的读者进程可以跳过申请，直接进行读操作。而实现这个过程又需要对读者进程进行计数：</p>
+<ul>
+<li>考虑到写者进程要与其他进程互斥执行，设置写互斥信号量 wmutex；</li>
+<li>读者进程之间可并发执行，设置计数变量 readercount 初始为 0；</li>
+<li>readercount 对于多个读者进程而言是临界资源，应为之设立互斥信号量 rmutex。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">int</span> readercount = <span class="hljs-number">0</span>;<br>semaphore rmutex = <span class="hljs-number">1</span>, wmutex = <span class="hljs-number">1</span>;<br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 写者进程——互斥访问</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">writer</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(wmutex);<br>        写操作<br>        V(wmutex);<br>    &#125; <span class="hljs-keyword">while</span>(<span class="hljs-literal">true</span>);<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 读者进程——</span><br><span class="hljs-comment"> * 系统中只存在的当前唯一的读者进程 0 时，与写者进程竞争临界资源</span><br><span class="hljs-comment"> * 访问 readercount 并计数</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">reader</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(rmutex);<br>        <span class="hljs-keyword">if</span> (readercount == <span class="hljs-number">0</span>) P(wmutex);<br>        readercount++;<br>        V(rmutex);<br>        读操作<br>        P(rmutex);<br>        readercount--;<br>        <span class="hljs-keyword">if</span> (readercount == <span class="hljs-number">0</span>) V(wmutex);<br>        V(rmutex);<br>    &#125; <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>主程序描述</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>&#123;<br>    cobegin<br>        reader₁(); reader₂(); ...<br>        writer₁(); writer₂(); ...<br>    coend<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="42-公平型读者-写者问题即解决方案"><a class="markdownIt-Anchor" href="#42-公平型读者-写者问题即解决方案"></a> 4.2 公平型读者-写者问题即解决方案</h3>
+<p>上述解决方案对写者进程来说，一旦系统中有读者进程在进行读操作，就必须等待，直到 readercount 等于 0。要消除这个读者优先，实现新来进程无论是读者还是写者都阻塞于同一队列，公平竞争临界资源，即“公平型读者-写者问题”的解决方案如下：<br />
+<img src="https://n1000g.github.io/post-images/1639601542576.png" srcset="/img/loading.gif" lazyload alt="公平型读者写者" /></p>
+<p>如图，设置一个互斥信号量 S，读者进程和写者进程都需要先竞争 S，再进行之前的操作，使得阻塞在 S 上的进程是什么属性都无所谓，实现公平竞争。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">int</span> readercount = <span class="hljs-number">0</span>;<br>semaphore rmutex = <span class="hljs-number">1</span>, wmutex = <span class="hljs-number">1</span>, S = <span class="hljs-number">1</span>;<br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 写者进程</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">writer</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(S);<br>        P(wmutex)<br>        V(S);<br>        写操作<br>        V(wmutex);<br>    &#125; <span class="hljs-keyword">while</span>(<span class="hljs-literal">true</span>);<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 读者进程</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">reader</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(S);<br>        P(rmutex);<br>        <span class="hljs-keyword">if</span> (readercount == <span class="hljs-number">0</span>) P(wmutex);<br>        readercount++;<br>        V(rmutex);<br>        V(S);<br>        读操作<br>        P(rmutex);<br>        readercount--;<br>        <span class="hljs-keyword">if</span> (readercount == <span class="hljs-number">0</span>) V(wmutex);<br>        V(rmutex);<br>    &#125; <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="43-写者优先"><a class="markdownIt-Anchor" href="#43-写者优先"></a> 4.3 写者优先</h3>
+<p>如题。<br />
+<img src="https://n1000g.github.io/post-images/1639601905558.png" srcset="/img/loading.gif" lazyload alt="写者优先" /></p>
+<p>仅第一个到达的写者进程与读者进程一起去 S 处排队</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">int</span> readercount = <span class="hljs-number">0</span>, writercount = <span class="hljs-number">0</span>;<br>semaphore rmutex = <span class="hljs-number">1</span>, wmutex = <span class="hljs-number">1</span>, S = <span class="hljs-number">1</span>, mutex = <span class="hljs-number">1</span>;<br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 写者进程——添加了与读者优先解决方案中与读者相似的逻辑</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">writer</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(mutex);<br>        <span class="hljs-keyword">if</span> (writercount == <span class="hljs-number">0</span>) P(S);<br>        writercount ++;<br>        V(mutex);<br><br>        P(wmutex)<br>        写操作<br>        V(wmutex);<br>        <br>        P(mutex);<br>        writercount --;<br>        <span class="hljs-keyword">if</span> (writercount == <span class="hljs-number">0</span>) V(S);<br>        V(mutex);<br>    &#125; <span class="hljs-keyword">while</span>(<span class="hljs-literal">true</span>);<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 读者进程——同 4.3</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">reader</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(S);<br>        P(rmutex);<br>        <span class="hljs-keyword">if</span> (readercount == <span class="hljs-number">0</span>) P(wmutex);<br>        readercount++;<br>        V(rmutex);<br>        V(S);<br>        读操作<br>        P(rmutex);<br>        readercount--;<br>        <span class="hljs-keyword">if</span> (readercount == <span class="hljs-number">0</span>) V(wmutex);<br>        V(rmutex);<br>    &#125; <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="44-限定读者问题"><a class="markdownIt-Anchor" href="#44-限定读者问题"></a> 4.4 限定读者问题</h3>
+<p>如题<br />
+可增设 rmax 信号量，使多出来的读者进程阻塞至此。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">int</span> readercount = <span class="hljs-number">0</span>;<br>semaphore rmutex = <span class="hljs-number">1</span>, wmutex = <span class="hljs-number">1</span>;<br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 写者进程——同 4.1</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">writer</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(wmutex);<br>        写操作<br>        V(wmutex);<br>    &#125; <span class="hljs-keyword">while</span>(<span class="hljs-literal">true</span>);<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 读者进程——多余读者挂至 rmax 信号量阻塞队列</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">reader</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(rmax);<br><br>        P(rmutex);<br>        <span class="hljs-keyword">if</span> (readercount == <span class="hljs-number">0</span>) P(wmutex);<br>        readercount++;<br>        V(rmutex);<br>        读操作<br>        P(rmutex);<br>        readercount--;<br>        <span class="hljs-keyword">if</span> (readercount == <span class="hljs-number">0</span>) V(wmutex);<br>        V(rmutex);<br><br>        V(rmax);<br>    &#125; <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="5-其他经典-p-v-操作问题"><a class="markdownIt-Anchor" href="#5-其他经典-p-v-操作问题"></a> 5. 其他经典 P-V 操作问题</h2>
+<h3 id="51-独木桥-单行道问题"><a class="markdownIt-Anchor" href="#51-独木桥-单行道问题"></a> 5.1 独木桥、单行道问题</h3>
+<p>如题，南北通车，单行道上只能走同一方向的车辆。使用记录型信号量模拟道路情况。<br />
+分析：两个方向的车辆基本性质完全相同，均类似读者-写者问题中写者进程。使每类第一个到达的进程与另一类进程竞争单行道这一临界资源。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 南边来的和北边来的车辆数量</span><br><span class="hljs-comment"> * 和临界资源——单行道</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">int</span> southcount = <span class="hljs-number">0</span>, northcount = <span class="hljs-number">0</span>;<br>semaphore road = <span class="hljs-number">1</span>;<br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 模拟由南向北的车辆</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">S2N</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(smutex);<br>        <span class="hljs-keyword">if</span> (southcount == <span class="hljs-number">0</span>) P(road);<br>        southcount++;<br>        V(smutex);<br>        通过单行道<br>        P(smutex);<br>        southcount--;<br>        <span class="hljs-keyword">if</span> (southcount == <span class="hljs-number">0</span>) V(road);<br>        V(smutex);<br>    &#125; <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 模拟由北向南的车辆</span><br><span class="hljs-comment"> */</span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">N2S</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">do</span> &#123;<br>        P(nmutex);<br>        <span class="hljs-keyword">if</span> (northcount == <span class="hljs-number">0</span>) P(road);<br>        northcount++;<br>        V(nmutex);<br>        通过单行道<br>        P(nmutex);<br>        northcount--;<br>        <span class="hljs-keyword">if</span> (northcount == <span class="hljs-number">0</span>) V(road);<br>        V(nmutex);<br>    &#125; <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="52-司机售票员同步问题"><a class="markdownIt-Anchor" href="#52-司机售票员同步问题"></a> 5.2 司机售票员同步问题</h3>
+<p>问题描述：汽车司机与售票员之间必须协同工作，一方面，只有售票员把车门关好了司机才能开车，因此，售票员关好车门应通知司机开车。另一方面，只有当司机已经停下，售票员才能开门上下客，故司机停车后应通知售票员。假定某辆公共汽车上有两名售票员与一名司机，汽车当前正在始发站停车上客，试设必要的信号灯及赋初值，写出他们的同步过程。</p>
+<p><strong>问题解答</strong></p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.codeleading.com/article/32956105455/">https://www.codeleading.com/article/32956105455/</a></p>
+</blockquote>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2022/01/09/hello-world/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Hello World</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/12/13/k2efUYuav/">
+                        <span class="hidden-mobile">【OS 基础课笔记】二、进程管理</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+
+  
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+  
+
+  
+    <!-- KaTeX -->
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0/dist/katex.min.css" />
+  
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
