@@ -11,4 +11,4 @@ tags: [折腾记录]
 
 在项目设置中，参照下图配置 Github Pages 即可实现代码修改时的自动部署
 
-![GitHub Pages 部署配置](_resources/GitHub_Pages_部署配置.png)
+![GitHub Pages 部署配置](https://n1000g.github.io/_resources/GitHub_Pages_部署配置.png)
