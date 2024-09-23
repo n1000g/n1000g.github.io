@@ -68,17 +68,38 @@
   }
   
   code {
-    color: white;
-    background: black;
+    color: #f8f8f2; // 改变字体颜色
+    background: #282a36; // 代码背景色
+    border: 1px solid #6272a4; // 边框颜色
+    border-radius: 4px; // 圆角
+    padding: 0.2rem 0.4rem; // 内边距
+    font-family: 'Courier New', monospace; // 字体
+    transition: background 0.3s ease; // 过渡效果
+
+    &:hover {
+        background: #44475a; // 悬停时的背景色
+    }
   }
-  
+
   div.highlighter-rouge code {
     display: block;
     overflow-x: auto;
     white-space: pre-wrap;
     padding: 1rem;
+    background: #1e1e1e; // 块级代码背景色
+    border-radius: 4px; // 圆角
+    border: 1px solid #6272a4; // 边框颜色
+    color: #f8f8f2; // 字体颜色
   }
-  
+
+  pre {
+    background: #282a36; // 块级代码背景
+    padding: 1rem;
+    border-radius: 4px; // 圆角
+    overflow-x: auto; // 防止溢出
+    border: 1px solid #6272a4; // 边框颜色
+  }
+
   blockquote {
     font-style: italic;
     border: thin solid black;
