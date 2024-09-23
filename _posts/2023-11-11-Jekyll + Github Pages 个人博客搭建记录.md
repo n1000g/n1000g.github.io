@@ -1,7 +1,7 @@
 ---
 layout: post
 category: blog
-tags: [折腾]
+tags: [play]
 ---
 [toc]
 
