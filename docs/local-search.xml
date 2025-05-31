@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+  
+  
+  <entry>
+    <title>重建博客项目记录</title>
+    <link href="/2025/06/01/%E9%87%8D%E5%BB%BA%E5%8D%9A%E5%AE%A2%E9%A1%B9%E7%9B%AE%E8%AE%B0%E5%BD%95/"/>
+    <url>/2025/06/01/%E9%87%8D%E5%BB%BA%E5%8D%9A%E5%AE%A2%E9%A1%B9%E7%9B%AE%E8%AE%B0%E5%BD%95/</url>
+    
+    <content type="html"><![CDATA[<p>2025.06.01 重置博客项目，因为不会前端，仍使用之前 <a href="https://hexo.io/">Hexo</a> 框架及 <a href="https://github.com/fluid-dev/hexo-theme-fluid">Fluid</a> 主题</p><p>记录一下搭建过程，以及这框架如何使用</p><span id="more"></span><h1 id="新建博客"><a href="#新建博客" class="headerlink" title="新建博客"></a>新建博客</h1><p>新建一篇文章</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># npx hexo new [layout] &lt;title&gt;</span><br>npx hexo new <span class="hljs-string">&quot;测试文档&quot;</span><br></code></pre></td></tr></table></figure><ul><li>默认的 layout 是 <code>post</code>，以后根据需要再学习添加新的 layout</li></ul><p>渲染</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo clean<br>npx hexo generate -b<br><span class="hljs-comment"># 可以本地启动 server 查看效果</span><br><span class="hljs-comment"># npx hexo server -p 8080</span><br></code></pre></td></tr></table></figure><p>直接 git push 后续交给 Github Pages</p><h1 id="搭建过程"><a href="#搭建过程" class="headerlink" title="搭建过程"></a>搭建过程</h1><h2 id="01-新建-node-环境"><a href="#01-新建-node-环境" class="headerlink" title="01 新建 node 环境"></a>01 新建 node 环境</h2><p>新建一个独立的 conda 环境，后续只需要 activate</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">conda create -n node<br>conda activate node<br></code></pre></td></tr></table></figure><p>Gemini 建议从 conda-forge 频道安装</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">conda install -c conda-forge nodejs<br></code></pre></td></tr></table></figure><p>验证安装</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">which</span> node<br><span class="hljs-built_in">which</span> npm<br>node -v<br>npm -v<br></code></pre></td></tr></table></figure><h2 id="02-照-Hexo-文档新建项目"><a href="#02-照-Hexo-文档新建项目" class="headerlink" title="02 照 Hexo 文档新建项目"></a>02 照 Hexo 文档新建项目</h2><p>安装 Hexo</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm install -g hexo<br>npm list -g<br>npx hexo version<br></code></pre></td></tr></table></figure><p>新建 Hexo 项目</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">mkdir</span> n1000g.github.io<br>hexo init n1000g.github.io<br><span class="hljs-built_in">cd</span> n1000g.github.io<br>npm install<br></code></pre></td></tr></table></figure><p>修改 <code>_config.yml</code> Site 相关配置</p><p>还有一些无关的 git 操作</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">git config --global user.name n0b1000g<br>git config --global user.email n0b1000g@gmail.com<br>git config --global core.editor <span class="hljs-string">&quot;vim&quot;</span><br>git remote add origin git@github.com:n1000g/n1000g.github.io.git<br>git add .<br>git commit<br>git checkout -b fluid<br>git branch -D master<br>git push -u origin fluid<br></code></pre></td></tr></table></figure><h2 id="03-照-Fluid-文档设置主题"><a href="#03-照-Fluid-文档设置主题" class="headerlink" title="03 照 Fluid 文档设置主题"></a>03 照 <a href="https://github.com/fluid-dev/hexo-theme-fluid?tab=readme-ov-file#2-%E8%8E%B7%E5%8F%96%E4%B8%BB%E9%A2%98%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC">Fluid 文档</a>设置主题</h2><p>下载<a href="https://github.com/fluid-dev/hexo-theme-fluid/releases">最新 release 版本</a>解压到 themes 目录，并将解压出的文件夹重命名为 fluid</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">tar zxvf hexo-theme-fluid-1.9.8.tar.gz<br><span class="hljs-built_in">rm</span> hexo-theme-fluid-1.9.8.tar.gz<br><span class="hljs-built_in">mv</span> hexo-theme-fluid-1.9.8 themes/fluid<br></code></pre></td></tr></table></figure><p>修改 <code>_config.yml</code> 文件 theme 项为 <code>fluid</code></p><p>创建「关于页」</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">npx hexo new page about<br></code></pre></td></tr></table></figure><h2 id="04-配置-Github-Pages"><a href="#04-配置-Github-Pages" class="headerlink" title="04 配置 Github Pages"></a>04 配置 Github Pages</h2><p>在 Github Pages - Build and deployment 设置为 <code>fluid</code> 分支 <code>docs</code> 目录</p><p>配置里 <code>public_dir</code> 目录修改为 <code>docs</code></p><p>然后把 docs 一起 push</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>record</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>record</tag>
+      
+      <tag>project</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  
+</search>
